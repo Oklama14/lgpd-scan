@@ -1,0 +1,10 @@
+{
+  "description": "O JSON diz Atendido no R06 e o relatorio diz Nao atendido. Sao dois registros da mesma auditoria: discordando, nao da para saber qual esta certo.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "data": "report.json",
+  "expect_kind": "relatorio",
+  "expect_clean": false,
+  "expect_data": {
+    "divergence": ">=1"
+  }
+}

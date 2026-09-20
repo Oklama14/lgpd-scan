@@ -1,0 +1,6 @@
+{
+  "description": "Citacoes sem trecho: nao bloqueiam a entrega, mas dizem quais afirmacoes ninguem conferiu.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_clean": true,
+  "expect": { "unquoted": ">=2", "errors": 0 }
+}

@@ -1,0 +1,7 @@
+{
+  "description": "O documento saiu com os buracos do modelo: mesma falha que a ferramenta reporta como R15.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "relatorio",
+  "expect_clean": false,
+  "expect": { "placeholders": ">=3" }
+}

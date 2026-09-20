@@ -1,0 +1,7 @@
+{
+  "description": "RIPD com um risco apurado e outro generico copiado de modelo. O generico nao cita nada.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "ripd",
+  "expect_clean": false,
+  "expect": { "uncited": ">=1" }
+}

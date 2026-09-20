@@ -1,0 +1,10 @@
+{
+  "description": "O snippet do report.json reproduziu a credencial. O documento ja tinha essa checagem; o registro de maquina nao tinha, e e ele que vai commitado sem ninguem reler.",
+  "repo": "fixtures/03-segredos-git/repo",
+  "data": "report.json",
+  "kind": "relatorio",
+  "expect_data": {
+    "invalid": ">=1"
+  },
+  "expect_clean": false
+}

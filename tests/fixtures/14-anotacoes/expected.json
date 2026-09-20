@@ -1,0 +1,42 @@
+{
+  "description": "Supressao com motivo e honrada e registrada; sem motivo e com sinal desconhecido sao REJEITADAS com instrucao, nunca em silencio. Anotacoes @lgpd: viram declaracao positiva, no mesmo vocabulario das outras skills de LGPD. Supressao rejeitada nao esconde nada: cpf, email, telefone e celular seguem contados.",
+  "expect_signals": {
+    "personal_data_field": 4
+  },
+  "expect_suppressed": [
+    {
+      "signal": "personal_data_field",
+      "file": "produto.entity.ts",
+      "reason_contains": "genero do produto"
+    },
+    {
+      "signal": "personal_data_field",
+      "file": "produto.entity.ts",
+      "reason_contains": "nome do produto"
+    }
+  ],
+  "expect_rejected": [
+    {
+      "signal": "personal_data_field",
+      "why_contains": "sem motivo"
+    },
+    {
+      "signal": "sinal_inexistente",
+      "why_contains": "desconhecido"
+    }
+  ],
+  "expect_declared": [
+    {
+      "kind": "pii",
+      "value": "cpf"
+    },
+    {
+      "kind": "basis",
+      "value": "consentimento"
+    },
+    {
+      "kind": "retention",
+      "value": "5anos"
+    }
+  ]
+}

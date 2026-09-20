@@ -1,0 +1,6 @@
+{
+  "description": "Tentativa de influenciar a auditoria, em portugues acentuado e em ingles. Tem de ser detectada, e o padrao precisa sobreviver ao deaccent do haystack. A contagem e por linha, nao por ocorrencia.",
+  "expect_signals": {
+    "suspicious_instruction": 2
+  }
+}

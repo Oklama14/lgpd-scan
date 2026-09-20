@@ -1,0 +1,9 @@
+{
+  "description": "Nome de metodo que nao existe na linha citada: o relatorio afirma removerContaDoTitular onde o codigo tem remove. Casamento por qualquer token deixava passar, porque Delete e Request estavam la — a palavra que carregava a afirmacao era a que nao batia.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_clean": true,
+  "expect": {
+    "warnings": ">=1",
+    "errors": 0
+  }
+}

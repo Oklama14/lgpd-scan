@@ -1,0 +1,9 @@
+{
+  "description": "Quatro regressoes encontradas rodando contra prosa portuguesa real, congeladas aqui. 'unico paragrafo' virava provedor de verificacao de idade; 'responsavel pelas decisoes' virava vinculo parental; o plano de acao que DESCREVE a mitigacao de prompt injection era acusado de ataque; e 'todo titular tem direito' virava marcador nao preenchido, porque TODO estava casando sem diferenciar caixa.",
+  "expect_signals": {
+    "age_verification_provider": 0,
+    "parental_link": 0,
+    "suspicious_instruction": 0,
+    "placeholder_unfilled": 0
+  }
+}

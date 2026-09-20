@@ -1,0 +1,11 @@
+{
+  "description": "Template Angular de politica de privacidade: interpolacao {{ versao }} e binding [class.active] nao sao marcador nao preenchido, e 'Todo titular' nao e TODO. O bucket legal passou a alcancar politica*.html, e sem estas guardas toda politica em Angular passaria a render falso positivo.",
+  "expect_signals": {
+    "placeholder_unfilled": 0,
+    "dpo_contact": ">=1"
+  },
+  "expect_legal_only": [
+    "dpo_contact"
+  ],
+  "expect_stacks": ["node-typescript"]
+}

@@ -1,0 +1,6 @@
+{
+  "description": "A politica promete botao de exclusao, exportacao pelo painel e criptografia. O codigo tem uma rota de leitura e mais nada. Publicar isso nao e texto ruim: e a nao conformidade escrita e assinada pelo controlador, que e o achado que o R15 levanta depois.",
+  "expect_kind": "politica",
+  "expect_clean": false,
+  "expect": { "promises": ">=3" }
+}

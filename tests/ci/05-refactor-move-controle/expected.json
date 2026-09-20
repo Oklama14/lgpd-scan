@@ -1,0 +1,5 @@
+{
+  "description": "Guarda de falso positivo: a rota de exclusao so mudou de arquivo. Observar controle por (sinal, arquivo) transformaria toda reorganizacao de pastas em alarme alto, e foi por isso que controle passou a ser observado pelo repositorio inteiro.",
+  "expect_sem_achado": ["delete_route"],
+  "expect_severidade": {"alta": 0}
+}

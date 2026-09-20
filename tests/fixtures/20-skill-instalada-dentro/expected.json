@@ -1,0 +1,8 @@
+{
+  "description": "A skill instalada dentro do projeto auditado — em .claude/skills/ e clonada solta em ferramentas/. Sem a guarda, o coletor lia a documentacao da propria ferramenta e reportava `tls_disabled` num arquivo que so CITA o exemplo, e `placeholder_unfilled` num modelo de politica. Ruido com cara de evidencia, que e o pior tipo.",
+  "expect_signals": {
+    "personal_data_field": ">=1",
+    "tls_disabled": 0,
+    "placeholder_unfilled": 0
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "description": "api/ e client/ com package.json proprios; a raiz nao tem manifesto.",
+  "expect_stacks": [
+    "node-typescript"
+  ],
+  "expect_signals": {
+    "personal_data_field": ">=2"
+  }
+}

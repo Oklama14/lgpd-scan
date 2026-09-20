@@ -1,0 +1,7 @@
+{
+  "description": "ROPA sem a secao de limites: entregue como se cobrisse o tratamento inteiro da organizacao.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "ropa",
+  "expect_clean": false,
+  "expect": { "missing_sections": ">=1" }
+}

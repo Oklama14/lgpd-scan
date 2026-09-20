@@ -1,0 +1,13 @@
+{
+  "description": "O relatorio e o registro de maquina dizendo a mesma coisa, com toda evidencia apontando para linha que existe.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "data": "report.json",
+  "expect_kind": "relatorio",
+  "expect_clean": true,
+  "expect_data": {
+    "invalid": 0,
+    "citations": 0,
+    "divergence": 0,
+    "checked": ">=7"
+  }
+}

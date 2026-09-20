@@ -1,0 +1,7 @@
+{
+  "description": "O relatorio virou o vazamento: valor da credencial transcrito no texto.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "relatorio",
+  "expect_clean": false,
+  "expect": { "leaks": ">=1" }
+}

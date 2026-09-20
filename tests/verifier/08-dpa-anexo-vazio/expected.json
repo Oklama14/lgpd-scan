@@ -1,0 +1,7 @@
+{
+  "description": "Minuta de DPA cujo anexo nao foi levantado: corpo de clausulas modelo com o nome da ferramenta em cima.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "dpa",
+  "expect_clean": false,
+  "expect": { "rows": ">=1" }
+}

@@ -1,0 +1,11 @@
+{
+  "description": "A linha OP02 afirma uma operacao inteira sem citar nada e sem declarar lacuna: escrita de memoria.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "ropa",
+  "expect_clean": false,
+  "expect": {
+    "rows": 1,
+    "unsupported": 0,
+    "errors": 0
+  }
+}

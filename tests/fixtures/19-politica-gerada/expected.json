@@ -1,0 +1,9 @@
+{
+  "description": "A politica gerada pela propria ferramenta continua sendo lida (o R15 precisa enxergar o canal do encarregado), mas sai etiquetada: sem isso a reconciliacao politica x codigo fica circular — a ferramenta conferindo o texto que ela mesma escreveu daquele codigo.",
+  "expect_signals": {
+    "dpo_contact": ">=1"
+  },
+  "expect_generated": [
+    {"signal": "dpo_contact", "file": "POLITICA-PRIVACIDADE.md"}
+  ]
+}

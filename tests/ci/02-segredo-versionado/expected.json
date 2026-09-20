@@ -1,0 +1,7 @@
+{
+  "description": "A PR commitou uma credencial. Em arquivo rastreado e alta: apagar a linha depois nao apaga o historico, entao quem clonou antes continua com ela.",
+  "expect_achados": [
+    {"signal": "hardcoded_secret", "tipo": "risco_novo", "severity": "alta"}
+  ],
+  "expect_severidade": {"alta": 1}
+}

@@ -1,0 +1,10 @@
+{
+  "description": "Dois requisitos omitidos e uma lacuna afirmada sem severidade e sem dizer o que foi procurado. Omitir e diferente de responder 'nao se aplica': o leitor fica sem saber se a pergunta foi feita.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "data": "report.json",
+  "expect_kind": "relatorio",
+  "expect_clean": false,
+  "expect_data": {
+    "invalid": ">=3"
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "schema": "lgpd-scan/report/1",
+  "tool_version": "0.5.0",
+  "generated_at": "2026-09-20T12:00:00+00:00",
+  "model": "modelo de teste",
+  "repo": {
+    "root": "fixture",
+    "commit": null,
+    "files_scanned": 6,
+    "stacks": [
+      "node-typescript"
+    ]
+  },
+  "scope": {
+    "groups": {
+      "base": "avaliado",
+      "anpd": "avaliado",
+      "eca": "nao_se_aplica"
+    },
+    "eca_reason": "ferramenta interna B2B, sem menor entre os titulares"
+  },
+  "requirements": [
+    {
+      "id": "R01",
+      "status": "Atendido",
+      "confidence": "Alta",
+      "evidence": [
+        {
+          "file": "src/users/entities/user.entity.ts",
+          "line": 4,
+          "snippet": "@Column({ unique: true }) email: string;"
+        },
+        {
+          "file": "src/users/dto/create-user.dto.ts",
+          "line": 3,
+          "snippet": "@IsEmail() email: string;"
+        }
+      ],
+      "note": "Nome, e-mail e CPF no cadastro."
+    },
+    {
+      "id": "R02",
+      "status": "Nao atendido",
+      "severity": "Baixa",
+      "confidence": "Alta",
+      "absence": "Nenhum campo do art. 11 no schema; busca por saude, biometria, origem racial e opiniao politica nao retornou nada.",
+      "note": "Nao ha dado sensivel neste cadastro."
+    },
+    {
+      "id": "R03",
+      "status": "Atendido",
+      "confidence": "Alta",
+      "evidence": [
+        {
+          "file": "src/users/users.controller.ts",
+          "line": 5,
+          "snippet": "@Delete('me')"
+        }
+      ]
+    },
+    {
+      "id": "R04",
+      "status": "Parcial",
+      "severity": "Media",
+      "confidence": "Alta",
+      "evidence": [
+        {
+          "file": "src/users/users.controller.ts",
+          "line": 3,
+          "snippet": "@Get('me')"
+        }
+      ],
+      "note": "Le o proprio cadastro, mas nao exporta em formato interoperavel."
+    },
+    {
+      "id": "R05",
+      "status": "Atendido",
+      "confidence": "Alta",
+      "evidence": [
+        {
+          "file": "src/users/users.controller.ts",
+          "line": 4,
+          "snippet": "@Patch('me')"
+        }
+      ]
+    },
+    {
+      "id": "R06",
+      "status": "Atendido",
+      "severity": "Alta",
+      "confidence": "Alta",
+      "absence": "Nenhuma coluna de aceite, versao de politica ou data de consentimento na entidade nem no DTO."
+    },
+    {
+      "id": "R07",
+      "status": "Nao atendido",
+      "severity": "Media",
+      "confidence": "Alta",
+      "absence": "Nenhuma coluna de expurgo, TTL ou rotina agendada no repositorio."
+    },
+    {
+      "id": "R08",
+      "status": "Atendido",
+      "confidence": "Alta",
+      "evidence": [
+        {
+          "file": "src/users/users.service.ts",
+          "line": 3,
+          "snippet": "await bcrypt.hash(dto.senha, 10)"
+        }
+      ]
+    },
+    {
+      "id": "R09",
+      "status": "Atendido",
+      "confidence": "Media",
+      "evidence": [
+        {
+          "file": "package.json",
+          "line": 1,
+          "snippet": "{"
+        }
+      ],
+      "note": "Nenhum segredo literal no repositorio."
+    },
+    {
+      "id": "R10",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Nao ha chamada de logger no recorte deste repositorio."
+    },
+    {
+      "id": "R11",
+      "status": "Nao atendido",
+      "severity": "Baixa",
+      "confidence": "Alta",
+      "absence": "Nenhum registro de operacoes versionado."
+    },
+    {
+      "id": "R12",
+      "status": "Nao atendido",
+      "severity": "Baixa",
+      "confidence": "Alta",
+      "absence": "Nenhuma dependencia de terceiro que receba dado pessoal no package.json."
+    },
+    {
+      "id": "R13",
+      "status": "Nao atendido",
+      "severity": "Media",
+      "confidence": "Alta",
+      "absence": "Nenhuma entidade, migration ou servico de incidente."
+    },
+    {
+      "id": "R14",
+      "status": "Nao atendido",
+      "severity": "Media",
+      "confidence": "Alta",
+      "absence": "Nenhum servico de notificacao de incidente."
+    },
+    {
+      "id": "R15",
+      "status": "Nao atendido",
+      "severity": "Media",
+      "confidence": "Alta",
+      "absence": "Nenhum contato de encarregado no repositorio."
+    },
+    {
+      "id": "R16",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Nenhum destino internacional identificado; a salvaguarda e pendencia documental."
+    },
+    {
+      "id": "R17",
+      "status": "Nao atendido",
+      "severity": "Baixa",
+      "confidence": "Alta",
+      "absence": "Nenhuma rotina de anonimizacao ou mascaramento."
+    },
+    {
+      "id": "R18",
+      "status": "Nao se aplica",
+      "confidence": "Alta",
+      "note": "Ferramenta interna B2B: nao ha menor entre os titulares."
+    },
+    {
+      "id": "R19",
+      "status": "Nao se aplica",
+      "confidence": "Alta",
+      "note": "Ver R18."
+    },
+    {
+      "id": "R20",
+      "status": "Nao se aplica",
+      "confidence": "Alta",
+      "note": "Ver R18."
+    },
+    {
+      "id": "R21",
+      "status": "Nao se aplica",
+      "confidence": "Alta",
+      "note": "Ver R18."
+    }
+  ]
+}

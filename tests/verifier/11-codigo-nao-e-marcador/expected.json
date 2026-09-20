@@ -1,0 +1,7 @@
+{
+  "description": "Guarda de falso positivo: chave, template string e bloco cercado sao codigo citado, nao buraco de modelo.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "relatorio",
+  "expect_clean": true,
+  "expect": { "placeholders": 0, "errors": 0 }
+}

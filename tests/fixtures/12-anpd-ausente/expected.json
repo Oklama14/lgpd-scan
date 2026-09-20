@@ -1,0 +1,13 @@
+{
+  "description": "Projeto que trata dado pessoal sem nada das resolucoes. As ausencias sao o achado.",
+  "expect_signals": {
+    "personal_data_field": ">=2",
+    "placeholder_unfilled": 0
+  },
+  "expect_absent": [
+    "incident_register",
+    "dpo_contact",
+    "dsar_flow",
+    "anonymization"
+  ]
+}

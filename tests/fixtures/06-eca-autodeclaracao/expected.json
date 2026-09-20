@@ -1,0 +1,12 @@
+{
+  "description": "Cadastro que coleta idade e confia: autodeclaracao, vedada pela Lei 15.211/2025.",
+  "expect_signals": {
+    "age_self_declaration": ">=3",
+    "minor_flag": ">=1"
+  },
+  "expect_absent": [
+    "age_verification_provider",
+    "parental_link",
+    "content_removal"
+  ]
+}

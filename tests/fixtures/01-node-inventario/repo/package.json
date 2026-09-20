@@ -1,0 +1,1 @@
+{"name":"fx","dependencies":{"@nestjs/core":"^11.0.0","typeorm":"^0.3.0","bcryptjs":"^2.4.3"}}

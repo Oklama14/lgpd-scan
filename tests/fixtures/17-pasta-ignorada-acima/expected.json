@@ -1,0 +1,10 @@
+{
+  "description": "A pasta varrida esta dentro de um repositorio git que a ignora — skill em .claude/skills/, subprojeto ignorado, pasta de entrega. `git ls-files --others --exclude-standard` devolve ZERO arquivo, e sem a checagem o coletor nao lia nada, nao achava nada, e o relatorio saia limpo: o pior resultado possivel para uma ferramenta de conformidade. Encontrado rodando a propria suite de dentro do DevComply.",
+  "git_outer": "/sub/",
+  "expect_listing_source": "walk",
+  "expect_listing_note": "zero arquivo",
+  "expect_files_scanned": ">=2",
+  "expect_signals": {
+    "personal_data_field": ">=3"
+  }
+}

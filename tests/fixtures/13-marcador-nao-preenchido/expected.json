@@ -1,0 +1,10 @@
+{
+  "description": "Politica publicada com o canal do encarregado nunca preenchido. Foi o achado real do piloto no DevComply.",
+  "expect_signals": {
+    "placeholder_unfilled": ">=2",
+    "dpo_contact": ">=1"
+  },
+  "expect_legal_only": [
+    "placeholder_unfilled"
+  ]
+}

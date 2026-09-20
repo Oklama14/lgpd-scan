@@ -1,0 +1,149 @@
+{
+  "schema": "lgpd-scan/report/1",
+  "tool_version": "0.5.0",
+  "generated_at": "2026-09-20T12:00:00+00:00",
+  "model": "teste",
+  "repo": {
+    "root": "fixture",
+    "commit": "abc1234",
+    "files_scanned": 3,
+    "stacks": []
+  },
+  "requirements": [
+    {
+      "id": "R01",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Nao ha schema neste recorte."
+    },
+    {
+      "id": "R02",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R03",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R04",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R05",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R06",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R07",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R08",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R09",
+      "status": "Nao atendido",
+      "severity": "Alta",
+      "confidence": "Alta",
+      "evidence": [
+        {
+          "file": "docker-compose.yml",
+          "line": 4,
+          "snippet": "POSTGRES_PASSWORD: ***",
+          "redacted": true
+        }
+      ],
+      "note": "Credencial de banco em arquivo rastreado pelo git."
+    },
+    {
+      "id": "R10",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R11",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R12",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R13",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R14",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R15",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R16",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R17",
+      "status": "Nao verificavel",
+      "confidence": "Alta",
+      "note": "Fora do recorte deste fixture."
+    },
+    {
+      "id": "R18",
+      "status": "Nao se aplica",
+      "confidence": "Alta",
+      "note": "Servico de infraestrutura, sem titular menor."
+    },
+    {
+      "id": "R19",
+      "status": "Nao se aplica",
+      "confidence": "Alta",
+      "note": "Servico de infraestrutura, sem titular menor."
+    },
+    {
+      "id": "R20",
+      "status": "Nao se aplica",
+      "confidence": "Alta",
+      "note": "Servico de infraestrutura, sem titular menor."
+    },
+    {
+      "id": "R21",
+      "status": "Nao se aplica",
+      "confidence": "Alta",
+      "note": "Servico de infraestrutura, sem titular menor."
+    }
+  ]
+}

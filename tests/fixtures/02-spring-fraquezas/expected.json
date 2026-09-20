@@ -1,0 +1,18 @@
+{
+  "description": "Spring com hash fraco, segredo em properties, dado sensivel de saude.",
+  "expect_stacks": [
+    "java-spring"
+  ],
+  "expect_signals": {
+    "password_hash_weak": ">=1",
+    "hardcoded_secret": ">=1",
+    "sensitive_data_field": ">=2",
+    "personal_data_field": ">=1",
+    "third_party_sdk": ">=1"
+  },
+  "expect_absent": [
+    "password_hash_strong",
+    "export_route",
+    "consent_record"
+  ]
+}

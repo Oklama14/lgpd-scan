@@ -1,0 +1,7 @@
+{
+  "description": "A politica promete exclusao e exportacao, e as duas rotas existem. Correcao aparece como pedido ao encarregado — promessa mediada e verdadeira sem rota nenhuma, porque a lei garante o direito e nao o botao.",
+  "repo": "fixtures/19-politica-gerada/repo",
+  "expect_kind": "politica",
+  "expect_clean": true,
+  "expect": { "promises": 0, "placeholders": 0 }
+}

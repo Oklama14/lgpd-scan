@@ -1,0 +1,7 @@
+{
+  "description": "Guarda de falso positivo: a marca de pendencia visivel do modelo nao e marcador nao preenchido.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "ropa",
+  "expect_clean": true,
+  "expect": { "placeholders": 0 }
+}

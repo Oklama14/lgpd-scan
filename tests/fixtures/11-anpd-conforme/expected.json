@@ -1,0 +1,13 @@
+{
+  "description": "Res. 15/2024, 18/2024 e 19/2024 implementadas: registro de incidente com retencao, canal do encarregado, salvaguarda de transferencia, fluxo do titular com prazo e anonimizacao.",
+  "expect_signals": {
+    "incident_register": ">=2",
+    "incident_notification": ">=1",
+    "dpo_contact": ">=1",
+    "transfer_safeguard": ">=1",
+    "dsar_flow": ">=1",
+    "dsar_deadline": ">=1",
+    "anonymization": ">=1"
+  },
+  "expect_absent": []
+}

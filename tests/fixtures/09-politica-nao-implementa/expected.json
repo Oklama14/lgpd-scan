@@ -1,0 +1,13 @@
+{
+  "description": "A politica promete portabilidade, verificacao de idade e auditoria; o codigo nao implementa nada. As ocorrencias da politica devem vir marcadas como declaratorias, nunca contadas como implementacao.",
+  "expect_signals": {
+    "age_verification_provider": 0,
+    "export_route": ">=1",
+    "audit_trail": ">=1"
+  },
+  "expect_legal_only": [
+    "export_route",
+    "audit_trail",
+    "delete_route_alt"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "description": "ROPA com zero citacao: o cabecalho diz que veio do codigo e o conteudo nao veio de lugar nenhum.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "ropa",
+  "expect_clean": false,
+  "expect": { "unsupported": ">=1", "ok": 0 }
+}

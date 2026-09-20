@@ -1,0 +1,6 @@
+{
+  "description": "A rota de exclusao da propria conta sumiu num refactor. Controle e observado pelo repositorio inteiro, nao por arquivo, e sumir de vez e regressao de direito do titular (art. 18, VI).",
+  "expect_achados": [
+    {"signal": "delete_route", "tipo": "controle_removido", "severity": "alta"}
+  ]
+}

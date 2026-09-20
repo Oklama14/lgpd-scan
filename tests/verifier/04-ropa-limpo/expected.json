@@ -1,0 +1,7 @@
+{
+  "description": "ROPA levantado do codigo: cada linha cita ou declara a lacuna.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "ropa",
+  "expect_clean": true,
+  "expect": { "rows": 0, "placeholders": 0, "unsupported": 0, "ok": ">=3" }
+}

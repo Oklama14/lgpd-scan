@@ -1,0 +1,7 @@
+{
+  "description": "A PR passou a coletar idade e nao ha nada que verifique. O achado e a combinacao, nao a coleta — e sai UMA vez: quando o sinal tambem estava na tabela de riscos, o mesmo arquivo aparecia duas vezes, uma baixa e outra alta.",
+  "expect_achados": [
+    {"signal": "age_self_declaration", "tipo": "eca_autodeclaracao", "severity": "alta", "quantidade": 1}
+  ],
+  "expect_severidade": {"alta": 1}
+}

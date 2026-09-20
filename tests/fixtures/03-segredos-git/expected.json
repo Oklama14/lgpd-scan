@@ -1,0 +1,14 @@
+{
+  "description": "Senha em compose versionado vs .env ignorado: so o versionado e achado.",
+  "git_init": true,
+  "git_tracked": [
+    "docker-compose.yml",
+    ".gitignore"
+  ],
+  "expect_signals": {
+    "hardcoded_secret": 1
+  },
+  "expect_stacks": [],
+  "expect_listing_source": "git",
+  "expect_no_listing_note": true
+}

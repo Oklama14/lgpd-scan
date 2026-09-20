@@ -1,0 +1,10 @@
+{
+  "description": "Verificacao real de idade, vinculo com responsavel e canal de denuncia.",
+  "expect_signals": {
+    "age_verification_provider": ">=1",
+    "parental_link": ">=2",
+    "content_removal": ">=1",
+    "minor_flag": ">=1"
+  },
+  "expect_absent": []
+}

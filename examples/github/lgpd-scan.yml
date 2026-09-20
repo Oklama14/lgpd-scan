@@ -1,0 +1,44 @@
+# Copie para .github/workflows/lgpd-scan.yml no seu repositorio.
+#
+# Antes do primeiro uso, grave a baseline uma vez, localmente, e commite o arquivo:
+#
+#   python3 scripts/ci_check.py . --update-baseline
+#   git add .lgpd-scan/baseline.json && git commit -m "chore: baseline lgpd-scan"
+#
+# Sem baseline nao existe "piorou", e um portao que reprova a PR que o instalou e
+# desinstalado na mesma tarde — por isso a ferramenta recusa rodar sem ela em vez de
+# inventar um ponto de partida.
+
+name: LGPD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write   # necessario para o SARIF aparecer na aba Security
+
+jobs:
+  conformidade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # o coletor lista via `git ls-files` e respeita o .gitignore
+
+      - name: Portao de conformidade
+        id: lgpd
+        uses: Oklama14/lgpd-scan@v1
+        with:
+          fail-on: alta
+          sarif: lgpd-scan.sarif
+
+      # `always()` de proposito: quando o portao reprova e que o SARIF interessa.
+      - name: Publicar na aba Security
+        if: always() && hashFiles('lgpd-scan.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: lgpd-scan.sarif
+          category: lgpd-scan

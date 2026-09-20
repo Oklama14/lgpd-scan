@@ -1,0 +1,13 @@
+{
+  "description": "Segredo citado com o valor mascarado: `POSTGRES_PASSWORD: ***` continua conferivel, porque o identificador sobrevive na linha, e nao carrega o valor. O registro de maquina vaza igual ao documento e costuma ser commitado sem ninguem reler.",
+  "repo": "fixtures/03-segredos-git/repo",
+  "data": "report.json",
+  "kind": "relatorio",
+  "expect_data": {
+    "invalid": 0,
+    "citations": 0
+  },
+  "expect": {
+    "leaks": 0
+  }
+}

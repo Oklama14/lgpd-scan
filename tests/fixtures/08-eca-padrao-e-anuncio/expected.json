@@ -1,0 +1,7 @@
+{
+  "description": "Configuracao padrao permissiva e SDK de anuncio com perfilamento.",
+  "expect_signals": {
+    "default_privacy_open": ">=2",
+    "ad_targeting": ">=2"
+  }
+}

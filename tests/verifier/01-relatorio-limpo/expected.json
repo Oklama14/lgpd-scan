@@ -1,0 +1,7 @@
+{
+  "description": "Relatorio bem escrito: toda citacao existe, tem trecho, e as secoes obrigatorias estao la.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "relatorio",
+  "expect_clean": true,
+  "expect": { "errors": 0, "rows": 0, "placeholders": 0, "ok": ">=3" }
+}

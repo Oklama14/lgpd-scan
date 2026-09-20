@@ -1,0 +1,7 @@
+{
+  "description": "Linha de tabela destacada por uma linha em branco, do jeito que um documento editado a mao produz. A versao anterior da checagem a lia como cabecalho de uma tabela nova e a deixava passar sem conferir.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "ropa",
+  "expect_clean": false,
+  "expect": { "rows": 1 }
+}

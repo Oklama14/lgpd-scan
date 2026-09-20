@@ -1,0 +1,18 @@
+{
+  "description": "NestJS com dado pessoal em entity e DTO, exclusao de conta real, bcrypt.",
+  "expect_stacks": [
+    "node-typescript"
+  ],
+  "expect_signals": {
+    "personal_data_field": ">=5",
+    "delete_route": ">=1",
+    "update_route": ">=1",
+    "password_hash_strong": ">=1",
+    "sensitive_data_field": 0
+  },
+  "expect_absent": [
+    "export_route",
+    "consent_record",
+    "audit_trail"
+  ]
+}

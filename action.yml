@@ -1,0 +1,71 @@
+name: lgpd-scan
+description: >-
+  Portao de conformidade LGPD, ANPD e ECA Digital: compara o repositorio com a
+  baseline e reprova quando a mudanca piora a situacao.
+author: Oklama14
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  path:
+    description: Pasta a analisar
+    required: false
+    default: "."
+  baseline:
+    description: Caminho da baseline (padrao <path>/.lgpd-scan/baseline.json)
+    required: false
+    default: ""
+  fail-on:
+    description: Nivel minimo que reprova — alta, media, baixa ou nenhum
+    required: false
+    default: "alta"
+  sarif:
+    description: Onde gravar o SARIF; vazio desliga
+    required: false
+    default: "lgpd-scan.sarif"
+  include-tests:
+    description: Incluir arquivos de teste na varredura
+    required: false
+    default: "false"
+
+outputs:
+  sarif:
+    description: Caminho do SARIF gerado
+    value: ${{ steps.scan.outputs.sarif }}
+
+runs:
+  using: composite
+  steps:
+    - id: scan
+      shell: bash
+      # `git ls-files` e o que faz o .gitignore ser respeitado, e ele precisa do
+      # historico: com fetch-depth 1 a listagem ainda funciona, mas o coletor avisa
+      # quando o git devolve menos do que ha no disco.
+      run: |
+        set -uo pipefail
+        ARGS=("${{ inputs.path }}" "--fail-on" "${{ inputs.fail-on }}")
+        if [ -n "${{ inputs.baseline }}" ]; then
+          ARGS+=("--baseline" "${{ inputs.baseline }}")
+        fi
+        if [ -n "${{ inputs.sarif }}" ]; then
+          ARGS+=("--sarif" "${{ inputs.sarif }}")
+          echo "sarif=${{ inputs.sarif }}" >> "$GITHUB_OUTPUT"
+        fi
+        if [ "${{ inputs.include-tests }}" = "true" ]; then
+          ARGS+=("--include-tests")
+        fi
+        SAIDA="${RUNNER_TEMP:-/tmp}/lgpd-scan-saida.txt"
+        python3 "${{ github.action_path }}/scripts/ci_check.py" "${ARGS[@]}" \
+          > "$SAIDA" 2>&1
+        STATUS=$?
+        cat "$SAIDA"
+        if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+          {
+            echo '## lgpd-scan'
+            echo '```'
+            cat "$SAIDA"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+        fi
+        exit "$STATUS"

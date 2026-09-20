@@ -1,0 +1,9 @@
+{
+  "description": "Os seis falsos positivos corrigidos na 0.3.0. Todos devem seguir em zero.",
+  "expect_signals": {
+    "sensitive_data_field": 0,
+    "hardcoded_secret": 0,
+    "retention_marker": 0,
+    "third_party_sdk": 0
+  }
+}

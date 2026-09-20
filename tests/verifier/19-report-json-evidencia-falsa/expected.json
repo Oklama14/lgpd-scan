@@ -1,0 +1,10 @@
+{
+  "description": "O registro de maquina nao pode ter padrao de prova mais baixo que o documento que as pessoas leem: linha depois do fim do arquivo, e palavra-chave trocada na linha certa.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "data": "report.json",
+  "expect_kind": "relatorio",
+  "expect_clean": false,
+  "expect_data": {
+    "citations": ">=2"
+  }
+}

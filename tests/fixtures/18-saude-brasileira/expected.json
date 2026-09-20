@@ -1,0 +1,6 @@
+{
+  "description": "Vocabulario de saude brasileiro: `cid` puro e o nome mais comum de coluna de dado do art. 11 e o coletor nao o detectava — o proprio template do relatorio usava `cid` como exemplo. A regra nao tem fronteira a direita de proposito (os termos sao prefixos), entao `cidade` e `cidadao` sao a armadilha e ficam de fora.",
+  "expect_signals": {
+    "sensitive_data_field": 4
+  }
+}

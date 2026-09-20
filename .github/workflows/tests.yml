@@ -1,0 +1,22 @@
+name: testes
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  suite:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # 3.8 e o piso declarado no SKILL.md. Uma suite que so roda na versao do
+        # desenvolvedor transforma o piso numa promessa que ninguem conferiu.
+        python: ["3.8", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: git --version && python --version
+      - name: Suite completa
+        run: python scripts/run_tests.py

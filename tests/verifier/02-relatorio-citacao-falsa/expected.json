@@ -1,0 +1,7 @@
+{
+  "description": "As tres formas de citar o que nao existe: arquivo ausente, linha depois do fim, linha vazia.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "expect_kind": "relatorio",
+  "expect_clean": false,
+  "expect": { "errors": ">=2" }
+}
