@@ -1,10 +1,13 @@
-# Saida da propria ferramenta quando ela audita um projeto
+# Saida da propria ferramenta quando ela audita um projeto -- so na raiz. Sem a
+# barra inicial, `ROPA.md` casava com `references/artifacts/ropa.md` no Windows
+# (git com core.ignorecase) e tres referencias da skill nunca foram versionadas,
+# junto com o POLITICA-PRIVACIDADE.md do fixture 19.
 .lgpd-scan/
-RELATORIO-LGPD.md
-ROPA.md
-RIPD.md
-DPA-MINUTA*.md
-POLITICA-PRIVACIDADE.md
+/RELATORIO-LGPD.md
+/ROPA.md
+/RIPD.md
+/DPA-MINUTA*.md
+/POLITICA-PRIVACIDADE.md
 
 # Instrucao operacional de uso unico, nao faz parte da skill
 COMMIT-ANTIGRAVITY.md
