@@ -1,0 +1,6 @@
+<form [formGroup]="form" (ngSubmit)="enviar()">
+  <label>Nome completo <input formControlName="nome"></label>
+  <label>CPF <input formControlName="cpf" mask="000.000.000-00"></label>
+  <label>Data de nascimento <input type="date" formControlName="dataNascimento"></label>
+  <button type="submit">Criar conta</button>
+</form>

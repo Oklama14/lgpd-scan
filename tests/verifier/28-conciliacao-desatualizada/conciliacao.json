@@ -1,0 +1,152 @@
+{
+  "schema": "lgpd-scan/conciliacao/1",
+  "gerado_em": "2026-10-25T23:00:00+00:00",
+  "origem": {
+    "tool_version": "0.5.0",
+    "commit": null,
+    "generated_at": "2026-01-10T12:00:00+00:00"
+  },
+  "declaracoes": {
+    "projeto": "fixture",
+    "gerado_em": "2026-10-25T20:00:00-03:00",
+    "itens": 10
+  },
+  "itens": [
+    {
+      "codigo": "T-03",
+      "marcado": true,
+      "resultado": "fora_da_skill",
+      "situacao_no_codigo": null
+    },
+    {
+      "codigo": "T-11",
+      "marcado": false,
+      "resultado": "lacuna_confirmada",
+      "situacao_no_codigo": "Nao atendido",
+      "requisitos": [
+        "R11"
+      ],
+      "severidade": "Baixa",
+      "evidencias": []
+    },
+    {
+      "codigo": "C-01",
+      "marcado": true,
+      "resultado": "so_relacao_parcial",
+      "situacao_no_codigo": null,
+      "relacionados": [
+        {
+          "requisito": "R06",
+          "situacao": "Nao atendido"
+        }
+      ]
+    },
+    {
+      "codigo": "C-03",
+      "marcado": true,
+      "resultado": "declarado_sem_implementacao",
+      "situacao_no_codigo": "Nao atendido",
+      "requisitos": [
+        "R06"
+      ],
+      "severidade": "Alta",
+      "evidencias": []
+    },
+    {
+      "codigo": "D-03",
+      "marcado": true,
+      "resultado": "declarado_com_lacuna",
+      "situacao_no_codigo": "Parcial",
+      "requisitos": [
+        "R04"
+      ],
+      "severidade": "Media",
+      "evidencias": [
+        {
+          "file": "src/users/users.controller.ts",
+          "line": 3
+        }
+      ]
+    },
+    {
+      "codigo": "D-04",
+      "marcado": false,
+      "resultado": "implementado_sem_declaracao",
+      "situacao_no_codigo": "Atendido",
+      "requisitos": [
+        "R05"
+      ],
+      "severidade": null,
+      "evidencias": [
+        {
+          "file": "src/users/users.controller.ts",
+          "line": 4
+        }
+      ]
+    },
+    {
+      "codigo": "D-07",
+      "marcado": true,
+      "resultado": "confirmado",
+      "situacao_no_codigo": "Atendido",
+      "requisitos": [
+        "R03"
+      ],
+      "severidade": null,
+      "evidencias": [
+        {
+          "file": "src/users/users.controller.ts",
+          "line": 5
+        }
+      ]
+    },
+    {
+      "codigo": "S-02",
+      "marcado": true,
+      "resultado": "nao_verificavel_no_codigo",
+      "situacao_no_codigo": "Nao verificavel",
+      "requisitos": [
+        "R16"
+      ],
+      "severidade": null,
+      "evidencias": []
+    },
+    {
+      "codigo": "R-01",
+      "marcado": true,
+      "resultado": "declarado_sem_implementacao",
+      "situacao_no_codigo": "Nao atendido",
+      "requisitos": [
+        "R15"
+      ],
+      "severidade": "Media",
+      "evidencias": []
+    },
+    {
+      "codigo": "R-07",
+      "marcado": true,
+      "resultado": "so_a_organizacao",
+      "situacao_no_codigo": null
+    }
+  ],
+  "divergencias": [
+    "C-03",
+    "D-03",
+    "R-01"
+  ],
+  "resumo": {
+    "declarado_sem_implementacao": 2,
+    "declarado_com_lacuna": 1,
+    "confirmado": 1,
+    "implementado_sem_declaracao": 1,
+    "lacuna_confirmada": 1,
+    "so_a_organizacao": 1,
+    "fora_da_skill": 1,
+    "so_relacao_parcial": 1,
+    "nao_verificavel_no_codigo": 1,
+    "nao_se_aplica": 0
+  },
+  "avisos": [
+    "codigo desconhecido no LGPD-Check: X-99"
+  ]
+}

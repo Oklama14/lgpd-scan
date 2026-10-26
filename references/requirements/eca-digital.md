@@ -18,6 +18,11 @@ não verifica", e essas duas conclusões são opostas.
 
 Vocabulário de status e a distinção declaração × implementação estão em `index.md`.
 
+O coletor também procura `content_removal` — canal de denúncia e remoção de
+conteúdo — e lista a ausência dele. Nenhum dos quatro requisitos o decide sozinho;
+num produto que alcança menores e recebe conteúdo dos usuários, a ausência vale uma
+linha no relatório, fora dos quatro requisitos e dita como contexto.
+
 ---
 
 ## R18 — Verificação de idade sem autodeclaração

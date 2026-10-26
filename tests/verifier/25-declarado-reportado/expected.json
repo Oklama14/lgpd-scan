@@ -1,0 +1,12 @@
+{
+  "description": "As tres divergencias aparecem na secao Declarado x codigo.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "data": "report.json",
+  "conciliacao": "conciliacao.json",
+  "expect_kind": "relatorio",
+  "expect_clean": true,
+  "expect": {
+    "declarations": 0,
+    "errors": 0
+  }
+}

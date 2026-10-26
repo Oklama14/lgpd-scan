@@ -1,0 +1,33 @@
+{
+  "description": "Front-end React com a CSP na configuracao de hospedagem (vercel.json, que nao e codigo, e precisa ser lido) e banner de consentimento que segura o gtag ate a escolha. O web storage guarda so preferencia, nao credencial. O documento de seguranca cita a CSP e o token e nao pode render nenhum dos dois. O componente se chama CookieBanner e cai no bucket legal pelo nome -- a ocorrencia vem como declaratoria, e frontend.md manda abrir o arquivo.",
+  "expect_frameworks": [
+    "react"
+  ],
+  "expect_signals": {
+    "web_storage_token": 0,
+    "content_security_policy": 1,
+    "cookie_consent_ui": ">=2"
+  },
+  "expect_in_file": [
+    {
+      "signal": "content_security_policy",
+      "file": "vercel.json",
+      "count": 1
+    },
+    {
+      "signal": "content_security_policy",
+      "file": "seguranca.md",
+      "count": 0
+    },
+    {
+      "signal": "cookie_consent_ui",
+      "file": "package.json",
+      "count": 1
+    },
+    {
+      "signal": "cookie_consent_ui",
+      "file": "CookieBanner.tsx",
+      "count": ">=1"
+    }
+  ]
+}

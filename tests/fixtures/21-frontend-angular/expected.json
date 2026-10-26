@@ -1,0 +1,25 @@
+{
+  "description": "Front-end Angular modelado no cliente do DevComply: token de sessao no localStorage sem CSP, Google Fonts importada pela folha de estilo, gtag carregado no index.html sem banner de consentimento, e um componente .vue -- extensao que estava em CODE_EXTS e nao em TEXT_EXTS, entao nunca era lida. O plano de acao em .md cita os tres problemas e nao pode render nenhum; a folha de estilo tem `.user-email` e nao pode render campo pessoal; o CDN comentado no index.html nao e carregado.",
+  "expect_stacks": ["node-typescript"],
+  "expect_frameworks": ["angular"],
+  "expect_signals": {
+    "web_storage_token": 1,
+    "content_security_policy": 0,
+    "third_party_web_resource": 1,
+    "cookie_consent_ui": 0,
+    "third_party_sdk": ">=1"
+  },
+  "expect_in_file": [
+    {"signal": "web_storage_token", "file": "auth.service.ts", "count": 1},
+    {"signal": "third_party_web_resource", "file": "styles.scss", "count": 1},
+    {"signal": "third_party_web_resource", "file": "index.html", "count": 0},
+    {"signal": "third_party_sdk", "file": "index.html", "count": ">=1"},
+    {"signal": "personal_data_field", "file": "cadastro.component.html", "count": ">=2"},
+    {"signal": "personal_data_field", "file": "Perfil.vue", "count": ">=1"},
+    {"signal": "personal_data_field", "file": "styles.scss", "count": 0},
+    {"signal": "web_storage_token", "file": "plano-de-acao.md", "count": 0},
+    {"signal": "third_party_web_resource", "file": "plano-de-acao.md", "count": 0},
+    {"signal": "content_security_policy", "file": "plano-de-acao.md", "count": 0},
+    {"signal": "cookie_consent_ui", "file": "plano-de-acao.md", "count": 0}
+  ]
+}

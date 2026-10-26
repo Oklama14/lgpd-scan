@@ -1,0 +1,11 @@
+{
+  "description": "A secao existe, mas so com uma das tres divergencias: as outras duas sao cobradas.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "data": "report.json",
+  "conciliacao": "conciliacao.json",
+  "expect_kind": "relatorio",
+  "expect_clean": false,
+  "expect": {
+    "declarations": 2
+  }
+}

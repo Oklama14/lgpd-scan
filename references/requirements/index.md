@@ -61,7 +61,33 @@ product, say the scope was judged inapplicable and why.
 | `Não se aplica` | The requirement does not reach this kind of product |
 
 Severity applies to gaps only: `Alta`, `Média`, `Baixa`, weighed by exposure of data
-subjects rather than by effort to fix.
+subjects rather than by effort to fix. Confidence is a different question — how sure
+you are, not how bad it is — and every finding carries both.
+
+| Severity | Criterion | Examples |
+|---|---|---|
+| `Alta` | Directly breaches the law, exposes sensitive data, or stops the subject from exercising a right | sensitive data (health, biometrics) or children's data unprotected; no path at all to exercise a right; age by self-declaration only; a credential in a tracked file; passwords hashed with MD5 or SHA-1 |
+| `Média` | Compromises a right of the subject or puts data at risk | a right served only by a manual, slow request; no record of processing operations; no incident register; the DPO channel left as a template placeholder |
+| `Baixa` | A defect of form or documentation, with no direct harm to the subject | a policy with no update date; a working process nobody documented; a consent record without the version of the text accepted |
+
+Where a requirement's own section fixes the severity, that wins; the table calibrates
+the rest. Torn between two levels: pick the higher one when sensitive data or
+children are involved, the lower one otherwise.
+
+The criteria and the tie-break are the DevComply's (its `criterios.ts`), with
+examples swapped for what code can show, so the two tools grade the same gap the
+same way. The DevComply calls the levels `Catastrófica`, `Grave` and `Leve`, one to
+one, as `lgpd-check.md` records. One example did not carry over: the DevComply calls
+"no procedure to notify an incident" catastrophic, but here that is R14, and nothing
+in a repository proves the procedure is missing — a controller can meet the deadline
+by hand. Grade R14 as the process gap it is.
+
+## Bridge to the LGPD-Check
+
+`lgpd-check.md` maps R01–R21 onto the 61 items of the LGPD-Check, the checklist the
+DevComply uses: which item each requirement decides, which it only touches, and which
+items only the organisation can prove. Read it when the user brings DevComply
+declarations or asks for the DevComply export — not on an ordinary audit.
 
 ## Declaration versus implementation
 

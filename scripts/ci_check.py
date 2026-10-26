@@ -18,6 +18,7 @@ aqui.
     python3 scripts/ci_check.py . --update-baseline     # grava o ponto de partida
     python3 scripts/ci_check.py .                       # compara e falha se piorou
     python3 scripts/ci_check.py . --fail-on media       # mais rigoroso
+    python3 scripts/ci_check.py . --fail-on grave       # o mesmo, na escala do DevComply
     python3 scripts/ci_check.py . --sarif lgpd.sarif    # aba Security do GitHub
 
 Python 3.8+, biblioteca padrao.
@@ -60,6 +61,7 @@ RISCOS = {
     "placeholder_unfilled": ("media", "marcador nunca preenchido no texto legal"),
     "default_privacy_open": ("media", "padrao permissivo de privacidade"),
     "suspicious_instruction": ("media", "texto dirigido a quem audita"),
+    "web_storage_token": ("media", "token de sessao no localStorage/sessionStorage"),
     # `age_self_declaration` NAO entra aqui. Coletar idade nao e risco por si; o
     # achado do ECA Digital e coletar sem nada que verifique, e isso e uma leitura
     # cruzada de dois sinais, tratada em `_achado_eca`. Quando estava nesta tabela,
@@ -86,6 +88,8 @@ CONTROLES = {
     "age_verification_provider": "verificacao de idade",
     "parental_link": "vinculo com responsavel",
     "content_removal": "remocao de conteudo",
+    "content_security_policy": "Content-Security-Policy",
+    "cookie_consent_ui": "consentimento de cookies",
 }
 
 # Crescimento que e decisao, nao rotina.
@@ -95,12 +99,29 @@ NOVIDADE_RELEVANTE = {
     "cloud_region": ("baixa", "regiao/destino novo"),
     "ad_targeting": ("media", "SDK de perfilamento publicitario novo"),
     "minor_flag": ("media", "o sistema passou a distinguir menor de idade"),
+    "third_party_web_resource": ("baixa", "recurso de terceiro carregado pelo navegador"),
 }
 
 INVENTARIO = {"personal_data_field", "external_http_call", "dsar_deadline",
               "soft_delete_marker"}
 
 ORDEM = {"alta": 3, "media": 2, "baixa": 1}
+
+# O DevComply chama a mesma escala de outro jeito (references/requirements/
+# lgpd-check.md); aceitar os dois nomes deixa o time usar no CI a palavra que ja usa
+# no plano de acao.
+NOMES_DEVCOMPLY = {"catastrofica": "alta", "grave": "media", "leve": "baixa"}
+
+
+def nivel_fail_on(valor):
+    nivel = str(valor).strip().lower()
+    nivel = nivel.replace("á", "a").replace("é", "e")
+    nivel = NOMES_DEVCOMPLY.get(nivel, nivel)
+    if nivel not in ORDEM and nivel != "nenhum":
+        raise argparse.ArgumentTypeError(
+            f"{valor!r}: use alta, media, baixa ou nenhum "
+            f"(ou catastrofica, grave, leve, a escala do DevComply)")
+    return nivel
 
 
 def _hits_por_arquivo(result, signal):
@@ -321,9 +342,10 @@ def main():
                         help="padrao: <repo>/.lgpd-scan/baseline.json")
     parser.add_argument("--update-baseline", action="store_true",
                         help="grava a baseline com o estado atual e sai")
-    parser.add_argument("--fail-on", default="alta",
-                        choices=["alta", "media", "baixa", "nenhum"],
-                        help="nivel minimo que reprova (padrao: alta)")
+    parser.add_argument("--fail-on", default="alta", type=nivel_fail_on,
+                        help="nivel minimo que reprova: alta, media, baixa ou nenhum "
+                             "(padrao: alta). Aceita a escala do DevComply: "
+                             "catastrofica, grave, leve")
     parser.add_argument("--sarif", default=None, help="grava o resultado em SARIF")
     parser.add_argument("--json", default=None, help="grava os achados em JSON")
     parser.add_argument("--include-tests", action="store_true")

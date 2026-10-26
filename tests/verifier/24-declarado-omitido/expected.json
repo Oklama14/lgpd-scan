@@ -1,0 +1,11 @@
+{
+  "description": "Conciliacao com tres divergencias e o relatorio sem a secao Declarado x codigo.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "data": "report.json",
+  "conciliacao": "conciliacao.json",
+  "expect_kind": "relatorio",
+  "expect_clean": false,
+  "expect": {
+    "declarations": 1
+  }
+}

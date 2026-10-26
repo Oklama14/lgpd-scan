@@ -20,7 +20,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
-TOOL_VERSION = "0.5.0"
+TOOL_VERSION = "0.6.0"
 
 # --------------------------------------------------------------------------
 # What we never walk into
@@ -63,6 +63,10 @@ TEXT_EXTS = {
     ".sql", ".prisma", ".graphql", ".gql",
     ".json", ".yml", ".yaml", ".xml", ".properties", ".toml", ".ini", ".conf",
     ".env", ".sh", ".bash", ".tf", ".tfvars", ".gradle", ".md", ".txt", ".html",
+    ".htm",
+    # Front-end. `.vue` e `.svelte` estavam em CODE_EXTS e nao aqui, entao nunca eram
+    # lidos: um formulario de cadastro inteiro em Vue saia do inventario sem aviso.
+    ".vue", ".svelte", ".css", ".scss", ".sass", ".less",
 }
 
 # Files where a personal-data field name means a field, not prose. The lexicon
@@ -71,8 +75,14 @@ TEXT_EXTS = {
 CODE_EXTS = {
     ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".java", ".kt", ".kts",
     ".py", ".rb", ".php", ".go", ".rs", ".cs", ".scala", ".groovy",
-    ".sql", ".prisma", ".graphql", ".gql", ".html", ".vue", ".svelte",
+    ".sql", ".prisma", ".graphql", ".gql", ".html", ".htm", ".vue", ".svelte",
 }
+
+# Folha de estilo nao declara campo nem implementa direito, mas e onde a fonte do
+# Google e o CDN entram (`@import url(...)`), e cada uma e uma requisicao do
+# navegador do titular a um terceiro. So os sinais de STYLE_SIGNALS rodam aqui:
+# `.user-email` numa folha de estilo e nome de classe, nao campo.
+STYLE_EXTS = {".css", ".scss", ".sass", ".less"}
 
 MAX_FILE_BYTES = 1_500_000
 SNIPPET_MAX = 160
@@ -253,7 +263,21 @@ CODE_ONLY_SIGNALS = LEXICON_SIGNALS | {
     # Um sinal que acusa a vitima de ser o agressor gasta a confianca do leitor
     # mais rapido do que um achado perdido, entao este fica restrito a codigo.
     "suspicious_instruction",
+    # Front-end: um documento de planejamento dizendo "tirar o token do
+    # localStorage" e intencao, nao o token no localStorage.
+    "web_storage_token",
 }
+
+# A CSP mora tanto no codigo quanto na configuracao de hospedagem (`vercel.json`,
+# `netlify.toml`, `nginx.conf`), que nao e codigo. O que ela nao pode ser e prosa:
+# "configurar Content-Security-Policy" num plano de acao e o contrario de ter uma.
+PROSE_EXTS = {".md", ".txt"}
+NOT_PROSE_SIGNALS = {"content_security_policy"}
+
+# Recurso de terceiro carregado pelo navegador: aparece no index.html, num
+# componente e na folha de estilo, nunca so em prosa.
+CODE_OR_STYLE_SIGNALS = {"third_party_web_resource"}
+STYLE_SIGNALS = CODE_OR_STYLE_SIGNALS
 
 # The inventory requirement needs breadth, not a sample: a 40-hit cap on a schema
 # with many personal fields silently truncates the very thing R01 must enumerate.
@@ -266,6 +290,8 @@ MANIFEST_OR_CODE_SIGNALS = {
     "third_party_sdk", "cloud_region", "external_http_call",
     # SDK de anuncio aparece no manifesto de dependencia tanto quanto no codigo.
     "ad_targeting",
+    # A biblioteca de banner de cookies e uma dependencia antes de ser um componente.
+    "cookie_consent_ui",
 }
 MANIFEST_BUCKETS = {"deps", "config"}
 
@@ -392,6 +418,46 @@ SIGNAL_RULES = [
     ("cloud_region",
      r"(?i)\b(us-east-[0-9]|us-west-[0-9]|eu-west-[0-9]|eu-central-[0-9]|"
      r"sa-east-[0-9]|ap-south[a-z]*-[0-9])\b",
+     set()),
+
+    # ---- front-end: o que roda no navegador do titular
+    # Fonte, CDN, mapa, captcha e video embutido: o navegador busca o recurso no
+    # servidor do terceiro, e o terceiro recebe o IP e o user agent do titular a
+    # cada pagina, sem que o back-end envie nada. E compartilhamento (R12) que nenhum
+    # sinal de back-end enxerga. Os hosts sao os de recurso estatico; analytics e
+    # pixel ja estao no third_party_sdk.
+    ("third_party_web_resource",
+     r"(?i)(fonts\.googleapis\.com|fonts\.gstatic\.com|use\.typekit\.net|"
+     r"kit\.fontawesome\.com|use\.fontawesome\.com|cdn\.jsdelivr\.net|unpkg\.com|"
+     r"cdnjs\.cloudflare\.com|code\.jquery\.com|stackpath\.bootstrapcdn\.com|"
+     r"cdn\.tailwindcss\.com|maps\.googleapis\.com|maps\.google\.com|"
+     r"google\.com/recaptcha|recaptcha\.net|hcaptcha\.com|challenges\.cloudflare\.com|"
+     r"youtube(-nocookie)?\.com/embed|player\.vimeo\.com|connect\.facebook\.net|"
+     r"platform\.twitter\.com)",
+     set()),
+    # Token de sessao em localStorage/sessionStorage fica legivel por qualquer script
+    # da pagina: um XSS, ou uma dependencia comprometida, leva a sessao. Procura a
+    # chave com nome de credencial -- `setItem('theme', ...)` nao interessa.
+    ("web_storage_token",
+     r"(?i)(local|session)Storage\s*(\.setItem\s*\(\s*[\w'\"`.\-]{0,50}?"
+     r"(token|jwt|auth|bearer|session|sessao|credential|credencia|refresh)"
+     r"|\[\s*['\"`][\w.\-]{0,40}?(token|jwt|auth|bearer)[^'\"`]*['\"`]\s*\]\s*="
+     r"|\.(token|jwt|auth\w*|access_?token|id_?token)\s*=)",
+     set()),
+    # Content-Security-Policy e o que reduz o dano de um token no web storage. Nao
+    # entra em ABSENCE_MATTERS: num back-end sem pagina a ausencia nao diz nada. A
+    # leitura e cruzada com o web_storage_token (references/stacks/frontend.md).
+    ("content_security_policy",
+     r"(?i)(content-security-policy|contentSecurityPolicy|helmet\s*\(|"
+     r"helmet\.contentSecurityPolicy|\bcsp\s*:|meta\s+http-equiv=['\"]?content-security)",
+     set()),
+    # Banner ou gestor de consentimento de cookies. A presenca e o comeco da leitura:
+    # o achado e se o script de terceiro espera a escolha ou carrega antes dela.
+    ("cookie_consent_ui",
+     r"(?i)(cookieconsent|cookie[-_]?consent|cookiebot|onetrust|klaro\b|"
+     r"tarteaucitron|osano|iubenda|consent[-_]?manager|cookie[-_]?banner|"
+     r"banner[-_]?(de[-_]?)?cookies|cookieyes|usercentrics|"
+     r"gtag\s*\(\s*['\"]consent['\"])",
      set()),
 
     # ---- Resolucoes da ANPD, so o que deixa rastro em codigo
@@ -550,6 +616,10 @@ NOISE_SKIP_SIGNALS = {
     "minor_flag", "default_privacy_open", "ad_targeting", "content_removal",
     "incident_register", "incident_notification", "dpo_contact",
     "transfer_safeguard", "dsar_flow", "dsar_deadline", "anonymization",
+    # Recurso comentado no index.html nao e carregado; token num comentario nao e
+    # gravado.
+    "third_party_web_resource", "web_storage_token", "content_security_policy",
+    "cookie_consent_ui",
 }
 
 COMMENT_PREFIXES = ("//", "#", "*", "/*", "--", "<!--", '"""', "'''")
@@ -689,6 +759,9 @@ FRAMEWORK_HINTS = {
         "nestjs": "@nestjs/core", "express": "\"express\"", "fastify": "\"fastify\"",
         "prisma": "\"prisma\"", "typeorm": "\"typeorm\"", "sequelize": "\"sequelize\"",
         "mongoose": "\"mongoose\"", "drizzle": "drizzle-orm",
+        # Front-end: qualquer um destes manda ler references/stacks/frontend.md.
+        "angular": "@angular/core", "react": "\"react\"", "vue": "\"vue\"",
+        "svelte": "\"svelte\"", "next": "\"next\"", "nuxt": "\"nuxt\"",
     },
     "java-spring": {
         "spring-boot": "spring-boot", "spring-data-jpa": "spring-boot-starter-data-jpa",
@@ -1000,7 +1073,9 @@ def scan(root, include_tests=False, max_hits=40):
             continue
         scanned += 1
 
-        is_code = os.path.splitext(rel_path)[1].lower() in CODE_EXTS
+        ext = os.path.splitext(rel_path)[1].lower()
+        is_code = ext in CODE_EXTS
+        is_style = ext in STYLE_EXTS
         is_example = bool(EXAMPLE_FILE.search(rel_path))
         # So o cabecalho: um documento que CITA o marcador no meio do texto (esta
         # propria skill, por exemplo) nao e um documento gerado.
@@ -1058,7 +1133,13 @@ def scan(root, include_tests=False, max_hits=40):
         for name, pattern, wanted_buckets in SIGNAL_RULES:
             if wanted_buckets and not (wanted_buckets & set(file_buckets)):
                 continue
+            if is_style and name not in STYLE_SIGNALS:
+                continue
             if name in CODE_ONLY_SIGNALS and not is_code:
+                continue
+            if name in CODE_OR_STYLE_SIGNALS and not (is_code or is_style):
+                continue
+            if name in NOT_PROSE_SIGNALS and ext in PROSE_EXTS:
                 continue
             if name in MANIFEST_OR_CODE_SIGNALS and not (
                     is_code or (MANIFEST_BUCKETS & set(file_buckets))):

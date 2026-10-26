@@ -1,5 +1,107 @@
 # Changelog
 
+## 0.6.0 — o declarado contra o codigo
+
+O DevComply registra o que a equipe **declara**, num checklist com os itens do
+LGPD-Check; esta skill registra o que o **codigo faz**. Ate aqui os dois nao se
+falavam: listas de requisitos, escalas e ate o sentido de "evidencia" eram
+diferentes. Esta versao liga um ao outro e cobre o front-end, que a skill nao lia.
+
+**62 casos, 326 checagens**, em cinco suites: coletor, verificador, portao de CI,
+DevComply e coerencia entre arquivos.
+
+### Ponte com o LGPD-Check
+
+`references/requirements/lgpd-check.md` liga R01–R21 aos 61 itens do LGPD-Check.
+Duas relacoes: **direta** (o requisito responde a mesma pergunta do item, e o status
+dele e o status do item no codigo) e **parcial** (toca o item sem decidir). Os 61
+itens caem em quatro grupos, sem sobra nem repeticao: 17 decididos pelo codigo, 15 so
+tocados, 10 que so a organizacao prova (encarregado, treinamento, RIPD) e 19 que o
+codigo poderia responder e a skill ainda nao avalia — candidatos a requisito.
+
+A tabela existe duas vezes, no documento e em `report_data.LGPD_CHECK`, e a suite de
+coerencia falha se as duas divergirem.
+
+A ligacao **nao** e um campo `lgpd_check` escrito pelo modelo em cada requisito do
+report.json. E derivada da tabela na exportacao: o que se deriva nao se escreve, e o
+que nao se escreve nao diverge.
+
+### Conciliacao: declarado x codigo
+
+`scripts/devcomply.py conciliar` le as declaracoes exportadas pelo DevComply
+(`devcomply/declaracoes/1`) contra o report.json e grava
+`.lgpd-scan/conciliacao.json`. Declaracao entra como a politica de privacidade entra
+no resto da skill: pista de onde olhar, nunca evidencia.
+
+O resultado que importa e a **divergencia** — item marcado como implementado cujo
+requisito direto o codigo mostra como `Parcial` ou `Nao atendido`. O verificador
+ganhou a categoria **DECLARACAO SEM IMPLEMENTACAO**, irma de PROMESSA SEM
+IMPLEMENTACAO: le a conciliacao sozinho e recusa o relatorio que deixa uma
+divergencia fora da secao "Declarado × codigo". Conciliacao feita contra um
+report.json anterior tambem e recusada: cobraria a secao a partir da auditoria errada.
+
+### Exportacao para o DevComply
+
+`scripts/devcomply.py export` grava `.lgpd-scan/devcomply.json`
+(`lgpd-scan/devcomply/1`): a situacao de cada item do LGPD-Check no codigo, com a
+severidade nas duas escalas, arquivo e linha. **Sem trecho de codigo**, e de
+proposito: o trecho pode carregar dado pessoal de um seed ou um segredo, e o
+DevComply manda texto para uma IA na nuvem. O contrato e o schema da exportacao, nao
+o report.json, para que uma mudanca interna da skill nao quebre a importacao em
+silencio.
+
+### "Nao verificavel" como dado
+
+O report.json aceita `unverifiable`: o que a auditoria suspeitou e o codigo nao
+responde, com assunto, motivo, a pergunta que resolveria e os itens do LGPD-Check.
+Vai na exportacao junto dos requisitos que ficaram `Nao verificavel`, e e de la que o
+DevComply tira perguntas para a equipe. O validador recusa entrada sem motivo, codigo
+inexistente e qualquer `evidence`: o que tem linha para citar e achado.
+
+### Uma escala de severidade
+
+A skill ja tinha `Alta`, `Media` e `Baixa`; faltava dizer o que cada uma significa.
+`references/requirements/index.md` traz agora o criterio, os exemplos e a regra de
+desempate do DevComply, com os exemplos trocados pelo que o codigo mostra. A
+correspondencia e de um para um com `Catastrofica`, `Grave` e `Leve`, e o
+`ci_check.py --fail-on` aceita os dois nomes.
+
+O template ganhou **Comece por aqui** — que o SKILL.md ja prometia e o template nao
+tinha —, ordenado por severidade como o plano de acao do DevComply.
+
+### Front-end
+
+`references/stacks/frontend.md`, para Angular, React, Vue, Svelte, Next e Nuxt, e
+quatro sinais novos:
+
+- `web_storage_token` — token de sessao em `localStorage`/`sessionStorage` (R08);
+- `content_security_policy` — lido em codigo e em configuracao de hospedagem
+  (`vercel.json`, `netlify.toml`, `nginx.conf`), nunca em prosa;
+- `third_party_web_resource` — fonte, CDN, mapa, captcha: o navegador do titular
+  manda IP e user agent ao terceiro sem o back-end enviar nada (R12);
+- `cookie_consent_ui` — banner ou gestor de consentimento (R06).
+
+Folhas de estilo passam a ser lidas, mas so para recurso de terceiro: `@import url()`
+e por onde a fonte do Google entra, e `.user-email` numa folha de estilo e nome de
+classe, nao campo.
+
+### Correcoes
+
+- **`.vue` e `.svelte` nunca eram lidos.** Estavam em `CODE_EXTS` e nao em
+  `TEXT_EXTS`: um formulario de cadastro inteiro em Vue saia do inventario sem aviso.
+- **Arquivos de referencia ausentes do repositorio.** O `.gitignore` ignorava
+  `ROPA.md`, `RIPD.md` e `POLITICA-PRIVACIDADE.md` em qualquer pasta — para nao
+  commitar a saida da skill num projeto auditado — e com isso ignorava tambem
+  `references/artifacts/ropa.md`, `ripd.md` e `politica-privacidade.md` (o git no
+  Windows nao diferencia maiuscula). Quem clonava ficava sem as instrucoes dos
+  artefatos, e a fixture 19 falhava. Os padroes agora sao ancorados na raiz.
+- **A checagem de nomes de sinal so lia metade das linhas.** Procurava "sinais:", e
+  os requisitos em ingles dizem "collector signals:". Agora le as duas, e o sentido
+  inverso tambem: sinal do coletor que nenhuma referencia explica falha a suite. Ela
+  achou tres — `dsar_flow`, `dsar_deadline` e `content_removal` —, agora documentados.
+- **Sinal sem papel no portao de CI** passa a falhar a suite: o portao ignorava em
+  silencio qualquer sinal que nao estivesse numa das quatro tabelas.
+
 ## 0.5.0 — a auditoria deixa de ser uma foto
 
 As tres coisas desta versao respondem a mesma pergunta: uma auditoria vale por quanto

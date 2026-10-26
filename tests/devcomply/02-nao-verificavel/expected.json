@@ -1,0 +1,32 @@
+{
+  "description": "O que o codigo nao responde sai como lista para o DevComply transformar em pergunta: os dois requisitos Nao verificavel do caso 16 e tres entradas de `unverifiable`, uma sem requisito e uma sem codigos (herda os do requisito).",
+  "report": "devcomply/02-nao-verificavel/report.json",
+  "expect_export": {
+    "sem_trecho": true,
+    "nao_verificavel": {
+      "total": 5,
+      "por_origem": {
+        "requisito": 2,
+        "auditoria": 3
+      },
+      "lgpd_check": {
+        "Contrato com operadores": [
+          "D-09",
+          "C-02"
+        ],
+        "Canal do encarregado": [
+          "R-01",
+          "R-02",
+          "D-02"
+        ],
+        "Treinamento da equipe": [
+          "R-07"
+        ],
+        "Salvaguarda de transferencia internacional": [
+          "S-02",
+          "S-03"
+        ]
+      }
+    }
+  }
+}

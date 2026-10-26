@@ -182,9 +182,15 @@ lei veda expressamente a autodeclaração, então o controle que o projeto acha 
 justamente o que a lei recusa.
 
 Stacks com suporte específico: **Node/TypeScript** (Express, NestJS, Prisma, TypeORM,
-Sequelize) e **Java/Spring** (Spring Boot, Spring Data JPA, Hibernate, Flyway,
-Liquibase). Outras stacks funcionam com o raciocínio genérico, e o relatório declara
-que a análise foi mais rasa nesse caso.
+Sequelize), **Java/Spring** (Spring Boot, Spring Data JPA, Hibernate, Flyway,
+Liquibase) e **front-end** (Angular, React, Vue, Svelte, Next, Nuxt). Outras stacks
+funcionam com o raciocínio genérico, e o relatório declara que a análise foi mais rasa
+nesse caso.
+
+O front-end tem achados que o back-end não mostra: o token de sessão no
+`localStorage`, lido por qualquer script da página; a fonte do Google e o CDN, que
+mandam o IP do titular a um terceiro sem o servidor enviar nada; o `gtag` no
+`index.html` que roda antes de qualquer banner de cookies.
 
 ## Documentos que a skill gera
 
@@ -287,6 +293,53 @@ Sem baseline o portão recusa rodar em vez de inventar um ponto de partida: não
 "piorou" sem comparação, e um check que reprova a PR que o instalou é desinstalado na
 mesma tarde.
 
+## Integração com o DevComply
+
+O DevComply e esta skill olham para o mesmo problema de
+lados opostos, e é por isso que se completam. O DevComply é um checklist web sobre o
+LGPD-Check: a equipe **declara** o que está implementado, e o que não deixa rastro em
+código — encarregado, contratos, treinamento, plano de incidentes — só pode ser
+declarado. A skill lê o que o **código faz**, e nisso uma declaração não a convence.
+
+`references/requirements/lgpd-check.md` liga os dois: para cada um dos 61 itens do
+LGPD-Check, qual requisito da skill o decide, qual só o toca, e quais só a organização
+prova.
+
+```bash
+python3 scripts/devcomply.py conciliar . --declaracoes devcomply-declaracoes.json
+python3 scripts/devcomply.py export .
+```
+
+```
+=== lgpd-scan: declarado (DevComply) x codigo ===
+
+  T-11  -  lacuna nos dois                     Nao atendido    R11
+  C-03  !! declarado, o codigo nao mostra      Nao atendido    R06
+  D-03  !  declarado, o codigo mostra lacuna   Parcial         R04
+  D-04  +  implementado, nao declarado         Atendido        R05
+  D-07  ok confirmado                          Atendido        R03
+  S-02  ?  nao verificavel no codigo           Nao verificavel R16
+  R-01  !! declarado, o codigo nao mostra      Nao atendido    R15
+  R-07     so a organizacao prova              -               -
+
+3 divergencia(s): C-03, D-03, R-01
+```
+
+**`conciliar`** confronta as declarações com o `report.json`. O achado que justifica
+ter as duas ferramentas é a divergência — item marcado como implementado que o código
+desmente —, e o verificador recusa o relatório que deixa uma de fora da seção
+"Declarado × código".
+
+**`export`** grava `.lgpd-scan/devcomply.json` para o DevComply importar: a situação
+de cada item no código, a severidade nas duas escalas (`Alta`↔`Catastrófica`,
+`Média`↔`Grave`, `Baixa`↔`Leve`), arquivo e linha — **sem trecho de código**, porque o
+trecho pode carregar dado pessoal de um seed ou um segredo, e o DevComply manda texto
+para uma IA na nuvem. O que o código não responde vai junto, como perguntas para a
+equipe.
+
+Os formatos são contratos versionados: `devcomply/declaracoes/1` na entrada,
+`lgpd-scan/devcomply/1` e `lgpd-scan/conciliacao/1` na saída.
+
 ## Rodando o coletor sozinho
 
 Útil para inspecionar o que a skill vai ver, ou para integrar em outro fluxo:
@@ -330,14 +383,15 @@ python3 scripts/run_tests.py eca      # só os casos com "eca" no nome
 python3 scripts/run_tests.py -v       # mostra cada asserção
 ```
 
-**52 casos, 221 checagens**, em quatro suítes:
+**62 casos, 326 checagens**, em cinco suítes:
 
 | Suíte | O que é cada caso |
 |---|---|
 | coletor | um repositório mínimo e um `expected.json` com o que deve e o que **não** deve aparecer |
 | verificador | um documento escrito e as categorias que ele deve acusar |
 | portão de CI | um par `antes/` e `depois/`, e os achados que a mudança deve gerar |
-| coerência | invariantes entre arquivos: tabela de requisitos, nomes de sinais, versão, frontmatter |
+| devcomply | um `report.json` e as declarações do DevComply; o que a exportação e a conciliação devem dizer |
+| coerência | invariantes entre arquivos: tabela de requisitos, ponte com o LGPD-Check, nomes de sinais, versão, frontmatter |
 
 A regra que sustenta o crescimento de escopo: **nenhum requisito novo entra sem
 fixture.** Um léxico regride em silêncio — você alarga um padrão para pegar um campo

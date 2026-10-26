@@ -3,7 +3,7 @@ name: lgpd-scan
 description: Audit a codebase for Brazilian data protection compliance — LGPD (Lei 13.709/2018), the ANPD resolutions, and the ECA Digital (Lei 15.211/2025) — using the source code itself as evidence, and write a Portuguese report where every finding cites file:line and a quoted snippet. Also generates ROPA (Art. 37), RIPD and a DPA draft. Use this whenever the user mentions LGPD, adequação à LGPD, proteção de dados, dados pessoais, privacidade, DPO, encarregado, ANPD, RIPD, ROPA, DPIA, ECA Digital, verificação de idade, or asks you to review a database schema, migration, API or authentication flow for privacy problems, or asks "este projeto está em conformidade?" — even if they never say the word LGPD.
 license: MIT
 metadata:
-  version: "0.5.0"
+  version: "0.6.0"
   requires: "python3 >= 3.8, sem dependencias externas"
   language: "pt-BR"
 ---
@@ -35,6 +35,7 @@ picked, and follow that route.
 | **Artefato** | "gera o ROPA", "preciso do RIPD", "escreve a política" | Steps 1–4, then `references/artifacts/` |
 | **Portão de CI** | "roda no CI", "falha a PR quando piorar" | `scripts/ci_check.py`, no full audit needed |
 | **Continuação** | `.lgpd-scan/STATUS.md` already exists | Read it first; resume at the unchecked checkpoint |
+| **Conciliação com o DevComply** | a DevComply checklist export, "compara com o que declaramos" | Full audit — or a current `report.json` — then step 9 |
 
 A focused review does **not** produce `RELATORIO-LGPD.md`. Answering a question about
 one migration with a twenty-one-section document is a way of not answering it.
@@ -99,6 +100,10 @@ The collector reports which stacks it detected:
 
 - `references/stacks/node.md` — Express, NestJS, Prisma, TypeORM, Sequelize
 - `references/stacks/spring.md` — Spring Boot, Spring Data JPA, Hibernate, Flyway
+- `references/stacks/frontend.md` — Angular, React, Vue, Svelte, Next, Nuxt: forms,
+  the session token in the browser, fonts and CDNs, cookie banners
+
+A full-stack repository needs two of these: the back-end notes and the front-end one.
 
 These say where each framework hides the thing you are looking for, and which signals
 are usually false positives there. Another stack: the generic reasoning still
@@ -123,11 +128,13 @@ run, the CI gate and the SARIF output derivable instead of rewritten.
 
 Write both. The verifier checks that they agree, and a disagreement is an error:
 they are two records of one audit, and if they differ there is no way to know which
-is right. The template has the schema and the five rules the validator applies.
+is right. The template has the schema and the six rules the validator applies —
+including `unverifiable`, the "não verificável" section as data, which is what lets
+the DevComply turn what the code cannot answer into questions for the team.
 
-Two things the template asks for that are easy to skip. Open with **Comece por
-aqui** — three prioritised actions, because twenty-one sections is a wall and the
-reader needs to know where the next hour goes. And pair **every** citation with a
+Two things the template asks for that are easy to skip. Right after the summary,
+**Comece por aqui** — three actions ordered by severity, because twenty-one sections
+is a wall and the reader needs to know where the next hour goes. And pair **every** citation with a
 backticked snippet of that line's real content: `arquivo.ts:49` — `@Delete(':id')`.
 The citation on its own only proves that a line exists.
 
@@ -188,6 +195,9 @@ Categories, in descending order of how much they should worry you:
   claims.
 - **PROMESSA SEM IMPLEMENTAÇÃO** — only for a generated policy: it promises something
   the code does not do. Either implement it or reword it as a request to the DPO.
+- **DECLARAÇÃO SEM IMPLEMENTAÇÃO** — only when DevComply declarations were reconciled
+  (step 9): an item the team marked as implemented, which the code shows as `Parcial`
+  or `Não atendido`, is missing from the "Declarado × código" section.
 - **REPORT.JSON FORA DO SCHEMA**, **EVIDÊNCIA DO REPORT.JSON QUE NÃO FECHA** and
   **JSON E RELATÓRIO DISCORDAM** — the machine record is missing a requirement, cites
   a line that is not there, or contradicts the document beside it.
@@ -218,7 +228,33 @@ python3 scripts/ci_check.py . --fail-on alta      # every PR
 ```
 
 `action.yml` is a ready GitHub Action and `examples/github/lgpd-scan.yml` the workflow
-to copy. Mention it when the audit is done — once, not twice.
+to copy. Mention it when the audit is done — once, not twice. `--fail-on` also takes
+the DevComply's names for the same scale: `catastrofica`, `grave`, `leve`.
+
+## 9. DevComply, when asked
+
+The DevComply is a checklist web app built on the LGPD-Check: the team *declares*
+what is implemented, item by item. This skill reads what the code does. The two meet
+through `references/requirements/lgpd-check.md` — which item of the checklist each
+requirement decides, which it only touches, which only the organisation can prove.
+Read it before either command.
+
+```bash
+python3 scripts/devcomply.py conciliar <repo> --declaracoes devcomply-declaracoes.json
+python3 scripts/devcomply.py export <repo>
+```
+
+`conciliar` puts the team's declarations against `.lgpd-scan/report.json` and writes
+`.lgpd-scan/conciliacao.json`. A declaration is a lead, never evidence — the same rule
+as a privacy policy. What matters is the divergence: an item marked as implemented
+whose requirement the code shows as a gap. Each one goes in the report's **Declarado ×
+código** section, and the verifier picks the file up on its own and refuses a report
+that leaves one out. It is the most useful single finding the comparison produces.
+
+`export` writes `.lgpd-scan/devcomply.json` for the DevComply to import: the status of
+each checklist item in the code, with file and line but **no snippet** — a snippet can
+carry a seed's personal data or a secret, and the DevComply sends text to a cloud
+model. The `unverifiable` list goes along, as questions for the team.
 
 ## How to judge well
 

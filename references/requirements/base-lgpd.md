@@ -73,7 +73,8 @@ route — confirm the route is scoped to the authenticated user rather than acce
 an arbitrary id, which is both a privacy failure and an IDOR.
 
 ## R06 — Registro de consentimento
-**Art. 8º, §1º** · collector signals: `consent_record` · absence matters
+**Art. 8º, §1º** · collector signals: `consent_record`, `cookie_consent_ui` · absence
+matters
 
 When consent is the legal basis, the controller must be able to demonstrate it was
 given. A checkbox that gates a form and stores nothing demonstrates nothing.
@@ -85,6 +86,11 @@ is `Parcial` — note precisely what is missing.
 Consent is not always the right basis, and the code cannot tell you which basis was
 chosen. Where the system appears to rely on consent, report what the code supports;
 where the basis is unclear, say so under `Não verificável` rather than assuming.
+
+Cookie consent is the front-end half of this requirement: whether a banner exists,
+whether trackers wait for the choice, and where the choice is kept. Read
+`references/stacks/frontend.md` when `cookie_consent_ui` fires or analytics load in
+`index.html`.
 
 ## R07 — Retenção e expurgo
 **Art. 15 e 16** · collector signals: `retention_marker`, `soft_delete_marker` ·
@@ -103,7 +109,7 @@ when this data stops being kept.
 
 ## R08 — Segurança do armazenamento de credenciais
 **Art. 46** · collector signals: `password_hash_strong`, `password_hash_weak`,
-`encryption_at_rest`, `tls_disabled`
+`encryption_at_rest`, `tls_disabled`, `web_storage_token`, `content_security_policy`
 
 Check the password hash first — bcrypt, argon2, scrypt or PBKDF2 with sane
 parameters is fine; MD5, SHA-1, unsalted SHA-256, or Spring's `NoOpPasswordEncoder`
@@ -113,6 +119,10 @@ Then check what else deserves encryption at rest (API keys the users themselves
 supply, tokens, sensitive fields from R02), and whether TLS verification is disabled
 anywhere. `rejectUnauthorized: false` is worth reporting even when it is only used
 against a managed database.
+
+On the client, the credential is the session token. `web_storage_token` puts it in
+`localStorage` or `sessionStorage`, readable by any script on the page; read it
+together with `content_security_policy` as `references/stacks/frontend.md` describes.
 
 ## R09 — Segredos fora do repositório
 **Art. 46** · collector signals: `hardcoded_secret`, `private_key_block`,
@@ -165,7 +175,7 @@ evidence. Absence is common and normally `Média`.
 
 ## R12 — Compartilhamento com terceiros e transferência internacional
 **Art. 33** · collector signals: `third_party_sdk`, `external_http_call`,
-`cloud_region`
+`cloud_region`, `third_party_web_resource`
 
 Every third party that receives personal data is an operator or a recipient, and one
 outside Brazil raises a transfer question. Read the dependency manifests and the
@@ -176,6 +186,11 @@ Report which third parties receive personal data and which of them process it ab
 Where you can see the destination host but not what is sent to it, say that — this
 section attracts confident overstatement, and a list of dependencies is not by itself
 evidence of a transfer.
+
+The browser shares too. `third_party_web_resource` — a font, a CDN, a map or a
+captcha loaded from another company's server — sends the subject's IP and user agent
+to that company on every page view, with nothing in the back-end. Usually `Baixa`,
+and usually a cheap fix; `references/stacks/frontend.md` has the reading.
 
 ---
 

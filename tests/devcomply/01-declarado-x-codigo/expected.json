@@ -1,0 +1,34 @@
+{
+  "description": "Declaracoes do DevComply contra o report.json do caso 16: tres divergencias (marcado, o codigo desmente), e um resultado de cada tipo.",
+  "report": "verifier/16-report-json-limpo/report.json",
+  "declaracoes": "declaracoes.json",
+  "expect_export": {
+    "decididos": 17,
+    "situacao": {
+      "C-03": "Nao atendido",
+      "D-07": "Atendido",
+      "T-06": "Parcial",
+      "D-03": "Parcial",
+      "S-02": "Nao verificavel",
+      "R-01": "Nao atendido",
+      "C-01": null
+    },
+    "gravidade": {"C-03": "catastrofica", "T-06": "grave", "T-11": "leve"},
+    "sem_trecho": true
+  },
+  "expect_conciliacao": {
+    "divergencias": ["C-03", "D-03", "R-01"],
+    "resultado": {
+      "D-07": "confirmado",
+      "C-03": "declarado_sem_implementacao",
+      "D-03": "declarado_com_lacuna",
+      "D-04": "implementado_sem_declaracao",
+      "T-11": "lacuna_confirmada",
+      "R-07": "so_a_organizacao",
+      "T-03": "fora_da_skill",
+      "C-01": "so_relacao_parcial",
+      "S-02": "nao_verificavel_no_codigo"
+    },
+    "avisos": 1
+  }
+}

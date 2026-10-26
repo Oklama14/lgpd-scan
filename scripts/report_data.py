@@ -61,6 +61,74 @@ REQUIREMENTS = [
     ("R21", "Perfilamento publicitario para menores", "Lei 15.211/2025", "eca"),
 ]
 
+# Ponte com o LGPD-Check -- o checklist de inspecao de Mendes, Viana e Rivero
+# (SBES 2021) avaliado por Neitzke et al. (SBQS 2023), que o DevComply usa. O
+# mapeamento e do lgpd-scan; os artigos nao trazem requisitos R01-R21.
+#
+# "direta": o requisito responde a mesma pergunta do item, entao a situacao dele
+# vale para o item. "parcial": o requisito toca o item, mas nao decide sozinho.
+# `references/requirements/lgpd-check.md` repete esta tabela para o leitor, e a
+# suite confere que as duas nao divergiram.
+LGPD_CHECK = {
+    "R01": {"direta": ["S-07"], "parcial": ["T-11"]},
+    "R02": {"direta": ["S-05"], "parcial": ["T-02"]},
+    "R03": {"direta": ["D-07"], "parcial": []},
+    "R04": {"direta": ["D-03", "D-06", "T-06"], "parcial": ["D-01"]},
+    "R05": {"direta": ["D-04"], "parcial": ["T-08"]},
+    "R06": {"direta": ["C-03"], "parcial": ["C-01", "C-04"]},
+    "R07": {"direta": ["D-08"], "parcial": []},
+    "R08": {"direta": ["S-17"], "parcial": ["S-01", "S-08"]},
+    "R09": {"direta": [], "parcial": ["S-01", "S-08"]},
+    "R10": {"direta": [], "parcial": ["D-05", "S-10"]},
+    "R11": {"direta": ["T-11"], "parcial": ["S-07", "S-10"]},
+    "R12": {"direta": ["D-09"], "parcial": ["C-02", "S-03"]},
+    "R13": {"direta": [], "parcial": ["S-11", "R-03"]},
+    "R14": {"direta": ["R-03"], "parcial": []},
+    "R15": {"direta": ["R-01", "R-02"], "parcial": ["D-02"]},
+    "R16": {"direta": ["S-02"], "parcial": ["S-03"]},
+    "R17": {"direta": ["T-13"], "parcial": []},
+    "R18": {"direta": [], "parcial": []},
+    "R19": {"direta": [], "parcial": ["C-05"]},
+    "R20": {"direta": [], "parcial": ["S-06"]},
+    "R21": {"direta": [], "parcial": []},
+}
+
+# Os 61 itens do LGPD-Check (47 obrigatorios + 14 opcionais, Apendice D da
+# dissertacao de C. A. Neitzke, UFMA, 2025).
+LGPD_CHECK_CODIGOS = (
+    [f"T-{n:02d}" for n in range(1, 15)]
+    + [f"C-{n:02d}" for n in range(1, 9)]
+    + [f"D-{n:02d}" for n in range(1, 16)]
+    + [f"S-{n:02d}" for n in range(1, 18)]
+    + [f"R-{n:02d}" for n in range(1, 8)]
+)
+
+# Itens sem requisito que os decida, em dois grupos. O primeiro nao deixa rastro
+# no repositorio: e o que o checklist do DevComply pergunta e a skill nao enxerga.
+# O segundo deixa rastro, mas ainda nao tem requisito aqui -- candidatos a R22+.
+LGPD_CHECK_SO_ORGANIZACAO = [
+    "T-01", "T-10", "T-12", "R-04", "R-05", "R-06", "R-07", "S-12", "S-14", "S-15",
+]
+LGPD_CHECK_FORA_DA_SKILL = [
+    "T-03", "T-04", "T-05", "T-07", "T-09", "T-14", "C-06", "C-07", "C-08",
+    "D-10", "D-11", "D-12", "D-13", "D-14", "D-15", "S-04", "S-09", "S-13", "S-16",
+]
+
+# Severidade da skill x gravidade do DevComply. As duas escalas medem o mesmo
+# eixo (quanto a lacuna expoe o titular), com nomes diferentes.
+SEVERIDADE_DEVCOMPLY = {"Alta": "catastrofica", "Media": "grave", "Baixa": "leve"}
+
+
+def lgpd_check_por_item():
+    """Item do LGPD-Check -> requisitos que o tocam, separados por relacao."""
+    mapa = {}
+    for rid, rel in LGPD_CHECK.items():
+        for tipo in ("direta", "parcial"):
+            for codigo in rel[tipo]:
+                mapa.setdefault(codigo, {"direta": [], "parcial": []})[tipo].append(rid)
+    return mapa
+
+
 REQUIREMENT_IDS = [r[0] for r in REQUIREMENTS]
 REQUIREMENT_BY_ID = {r[0]: {"title": r[1], "legal": r[2], "group": r[3]}
                      for r in REQUIREMENTS}
@@ -223,6 +291,48 @@ def validate(data):
             "requisitos ausentes do JSON (use `Nao se aplica` com a razao em vez de "
             "omitir): " + ", ".join(faltando))
 
+    problems.extend(_unverifiable_problems(data.get("unverifiable")))
+    return problems
+
+
+def _unverifiable_problems(entries):
+    """`unverifiable` e opcional; quando vem, cada entrada precisa servir de pergunta.
+
+    E a secao "Nao verificavel a partir do codigo" em formato de dado: o que a
+    auditoria suspeitou e o codigo nao responde. O DevComply a transforma em
+    perguntas para a equipe, por isso `topic` e `reason` sao obrigatorios e os
+    codigos do LGPD-Check, quando vem, precisam existir.
+    """
+    if entries is None:
+        return []
+    if not isinstance(entries, list):
+        return ["unverifiable: precisa ser uma lista"]
+    problems = []
+    for n, entry in enumerate(entries, 1):
+        onde = f"unverifiable[{n}]"
+        if not isinstance(entry, dict):
+            problems.append(f"{onde}: item que nao e objeto")
+            continue
+        for campo in ("topic", "reason"):
+            if not str(entry.get(campo) or "").strip():
+                problems.append(f"{onde}: `{campo}` ausente")
+        rid = entry.get("requirement")
+        if rid not in (None, "") and rid not in REQUIREMENT_BY_ID:
+            problems.append(f"{onde}: requisito desconhecido {rid!r}")
+        codigos = entry.get("lgpd_check")
+        if codigos is not None:
+            if not isinstance(codigos, list):
+                problems.append(f"{onde}: `lgpd_check` precisa ser lista de codigos")
+            else:
+                for codigo in codigos:
+                    if str(codigo).strip().upper() not in LGPD_CHECK_CODIGOS:
+                        problems.append(f"{onde}: codigo do LGPD-Check desconhecido "
+                                        f"{codigo!r}")
+        if "evidence" in entry or "snippet" in entry:
+            # O que e nao verificavel nao tem linha que prove; e o campo vai para
+            # fora da skill, onde trecho de codigo nao deve ir.
+            problems.append(f"{onde}: sem `evidence` nem trecho -- o que tem linha "
+                            f"para citar e achado, nao 'nao verificavel'")
     return problems
 
 

@@ -1,0 +1,51 @@
+{
+    "schema": "devcomply/declaracoes/1",
+    "projeto": "fixture",
+    "gerado_em": "2026-10-25T20:00:00-03:00",
+    "itens": [
+        {
+            "codigo": "D-07",
+            "marcado": true
+        },
+        {
+            "codigo": "C-03",
+            "marcado": true
+        },
+        {
+            "codigo": "D-03",
+            "marcado": true
+        },
+        {
+            "codigo": "R-01",
+            "marcado": true
+        },
+        {
+            "codigo": "R-07",
+            "marcado": true
+        },
+        {
+            "codigo": "D-04",
+            "marcado": false
+        },
+        {
+            "codigo": "T-11",
+            "marcado": false
+        },
+        {
+            "codigo": "S-02",
+            "marcado": true
+        },
+        {
+            "codigo": "T-03",
+            "marcado": true
+        },
+        {
+            "codigo": "C-01",
+            "marcado": true
+        },
+        {
+            "codigo": "X-99",
+            "marcado": true
+        }
+    ]
+}

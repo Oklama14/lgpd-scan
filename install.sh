@@ -20,7 +20,7 @@
 
 set -eu
 
-VERSION="0.5.0"
+VERSION="0.6.0"
 MARK_BEGIN="<!-- lgpd-scan:begin -->"
 MARK_END="<!-- lgpd-scan:end -->"
 

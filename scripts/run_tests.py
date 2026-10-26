@@ -2,14 +2,16 @@
 """
 lgpd-scan fixture tests.
 
-Two suites, one command.
+Five suites, one command.
 
 Each directory under tests/fixtures/ is a tiny repository plus an expected.json
 saying what the collector must and must not find in it. Each directory under
 tests/verifier/ is a written document plus an expected.json saying which of the
 verifier's categories it must trip -- including the two false-positive guards,
 because a verifier that cries wolf about legitimate pendency markers gets turned
-off, and then nothing is verified at all.
+off, and then nothing is verified at all. tests/ci/ holds before/after pairs for
+the CI gate, tests/devcomply/ the DevComply export and reconciliation, and the
+last suite checks invariants between files.
 
 This harness exists because of a hard rule: no new requirement enters the skill
 without a fixture. Going from twelve requirements to twenty-one multiplies the
@@ -36,6 +38,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ci_check  # noqa: E402
 import collect  # noqa: E402
+import devcomply  # noqa: E402
 import report_data  # noqa: E402
 import verify_report  # noqa: E402
 
@@ -44,6 +47,7 @@ TESTS = os.path.join(ROOT, "tests")
 FIXTURES = os.path.join(TESTS, "fixtures")
 VERIFIER = os.path.join(TESTS, "verifier")
 CI = os.path.join(TESTS, "ci")
+DEVCOMPLY = os.path.join(TESTS, "devcomply")
 
 
 def _git_init(work, tracked):
@@ -147,6 +151,29 @@ def run_fixture(path, verbose=False):
                 f"obtido {sorted(result['stacks_detected'])}")
         elif verbose:
             print(f"      ok  stacks {sorted(expected_stacks)}")
+
+    for framework in spec.get("expect_frameworks", []):
+        checks += 1
+        if framework not in result["frameworks_detected"]:
+            failures.append(f"framework {framework} nao detectado "
+                            f"(veio {result['frameworks_detected']})")
+        elif verbose:
+            print(f"      ok  framework {framework}")
+
+    # Contagem por arquivo: o que importa as vezes e DE ONDE veio a ocorrencia -- o
+    # .vue que antes nao era lido, a folha de estilo que so pode render um sinal, o
+    # documento de planejamento que nao pode render nenhum.
+    for expectation in spec.get("expect_in_file", []):
+        checks += 1
+        actual = sum(1 for h in result["signals"].get(expectation["signal"], [])
+                     if h["file"].endswith(expectation["file"]))
+        ok, rendered = compare(expectation.get("count", ">=1"), actual)
+        if not ok:
+            failures.append(f"{expectation['signal']} em {expectation['file']}: "
+                            f"esperado {rendered}, obtido {actual}")
+        elif verbose:
+            print(f"      ok  {expectation['signal']} em {expectation['file']} "
+                  f"{rendered}")
 
     # Um sinal cujas ocorrencias vem TODAS do texto legal e uma promessa, nao uma
     # implementacao -- a distincao que o relatorio precisa fazer para nao creditar
@@ -387,6 +414,11 @@ def run_verifier_case(path, verbose=False):
     if result is not None and spec.get("data"):
         result["data"] = verify_report.verify_data(
             os.path.join(path, spec["data"]), repo, lines)
+    if result is not None and spec.get("conciliacao"):
+        gerado = (report_data.load(os.path.join(path, spec["data"])).get("generated_at")
+                  if spec.get("data") else None)
+        result["declarations"] = verify_report.check_declarations(
+            lines, os.path.join(path, spec["conciliacao"]), gerado)
 
     failures, checks = [], 0
 
@@ -441,6 +473,106 @@ def run_verifier_case(path, verbose=False):
 
 
 
+def run_devcomply_case(path, verbose=False):
+    """Exportacao para o DevComply e conciliacao das declaracoes.
+
+    O caso aponta um report.json (de outro caso, para nao duplicar auditoria) e
+    traz as declaracoes como o DevComply as exporta. O que importa conferir: o item
+    decidido pelo requisito certo, o trecho de codigo que NAO vai junto, e cada
+    resultado da conciliacao -- sobretudo as divergencias, que o verificador cobra.
+    """
+    name = os.path.basename(path)
+    spec_path = os.path.join(path, "expected.json")
+    if not os.path.isfile(spec_path):
+        return name, ["falta expected.json"], 0
+    with open(spec_path, encoding="utf-8") as handle:
+        spec = json.load(handle)
+
+    data = report_data.load(os.path.join(TESTS, spec["report"]))
+    failures, checks = [], 0
+
+    exp = spec.get("expect_export") or {}
+    if exp:
+        saida = devcomply.exportar(data)
+        por_codigo = {i["codigo"]: i for i in saida["itens"]}
+        checks += 1
+        if saida.get("schema") != devcomply.EXPORT_SCHEMA:
+            failures.append(f"export: schema {saida.get('schema')!r}")
+        if "decididos" in exp:
+            checks += 1
+            decididos = sum(1 for i in saida["itens"] if i.get("situacao"))
+            if decididos != exp["decididos"]:
+                failures.append(f"export: decididos esperado {exp['decididos']}, "
+                                f"obtido {decididos}")
+        for codigo, esperado in (exp.get("situacao") or {}).items():
+            checks += 1
+            obtido = (por_codigo.get(codigo) or {}).get("situacao")
+            if obtido != esperado:
+                failures.append(f"export {codigo}: esperado {esperado}, obtido {obtido}")
+        for codigo, esperado in (exp.get("gravidade") or {}).items():
+            checks += 1
+            obtido = (por_codigo.get(codigo) or {}).get("gravidade_devcomply")
+            if obtido != esperado:
+                failures.append(f"export {codigo}: gravidade esperada {esperado}, "
+                                f"obtida {obtido}")
+        if exp.get("sem_trecho"):
+            checks += 1
+            if "snippet" in json.dumps(saida):
+                failures.append("export: trecho de codigo (`snippet`) vazou para o DevComply")
+        nv = exp.get("nao_verificavel")
+        if nv:
+            lista = saida.get("nao_verificavel") or []
+            if "total" in nv:
+                checks += 1
+                if len(lista) != nv["total"]:
+                    failures.append(f"nao_verificavel: esperado {nv['total']}, "
+                                    f"obtido {len(lista)}")
+            for origem, esperado in (nv.get("por_origem") or {}).items():
+                checks += 1
+                obtido = sum(1 for e in lista if e.get("origem") == origem)
+                if obtido != esperado:
+                    failures.append(f"nao_verificavel origem={origem}: esperado "
+                                    f"{esperado}, obtido {obtido}")
+            for assunto, codigos in (nv.get("lgpd_check") or {}).items():
+                checks += 1
+                achado = [e for e in lista if e.get("assunto") == assunto]
+                if not achado:
+                    failures.append(f"nao_verificavel: falta {assunto!r}")
+                elif sorted(achado[0].get("lgpd_check") or []) != sorted(codigos):
+                    failures.append(f"nao_verificavel {assunto!r}: lgpd_check esperado "
+                                    f"{sorted(codigos)}, obtido "
+                                    f"{sorted(achado[0].get('lgpd_check') or [])}")
+
+    con = spec.get("expect_conciliacao") or {}
+    if con:
+        with open(os.path.join(path, spec.get("declaracoes", "declaracoes.json")),
+                  encoding="utf-8") as handle:
+            declaracoes = json.load(handle)
+        saida = devcomply.conciliar(data, declaracoes)
+        por_codigo = {i["codigo"]: i for i in saida["itens"]}
+        if "divergencias" in con:
+            checks += 1
+            if sorted(saida["divergencias"]) != sorted(con["divergencias"]):
+                failures.append(f"divergencias: esperado {sorted(con['divergencias'])}, "
+                                f"obtido {sorted(saida['divergencias'])}")
+        for codigo, esperado in (con.get("resultado") or {}).items():
+            checks += 1
+            obtido = (por_codigo.get(codigo) or {}).get("resultado")
+            if obtido != esperado:
+                failures.append(f"conciliacao {codigo}: esperado {esperado}, "
+                                f"obtido {obtido}")
+        if "avisos" in con:
+            checks += 1
+            ok, rendered = compare(con["avisos"], len(saida["avisos"]))
+            if not ok:
+                failures.append(f"avisos: esperado {rendered}, obtido "
+                                f"{len(saida['avisos'])}")
+
+    if verbose and not failures:
+        print(f"      ok  {checks} checagens")
+    return name, failures, checks
+
+
 # --------------------------------------------------------------------------
 # Terceira suite: o que nao e caso, e sim coerencia entre as partes
 # --------------------------------------------------------------------------
@@ -491,10 +623,96 @@ def check_requirements_table():
     return failures, checks
 
 
+def check_lgpd_check_bridge():
+    """A ponte com o LGPD-Check em report_data.py e em requirements/lgpd-check.md."""
+    path = os.path.join(ROOT, "references", "requirements", "lgpd-check.md")
+    failures, checks = [], 0
+    if not os.path.isfile(path):
+        return ["references/requirements/lgpd-check.md nao existe"], 1
+    with open(path, encoding="utf-8") as handle:
+        texto = handle.read()
+
+    def codigos(celula):
+        return sorted(re.findall(r"[TCDSR]-\d{2}", celula or ""))
+
+    linhas = {}
+    for line in texto.splitlines():
+        parts = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(parts) == 4 and re.match(r"^R\d{2}$", parts[0]):
+            linhas[parts[0]] = (codigos(parts[2]), codigos(parts[3]))
+
+    for rid in report_data.REQUIREMENT_IDS:
+        checks += 1
+        rel = report_data.LGPD_CHECK.get(rid)
+        if rel is None:
+            failures.append(f"{rid} sem entrada em report_data.LGPD_CHECK")
+            continue
+        if rid not in linhas:
+            failures.append(f"{rid} esta no codigo e nao na tabela do lgpd-check.md")
+            continue
+        doc_direta, doc_parcial = linhas[rid]
+        if doc_direta != sorted(rel["direta"]) or doc_parcial != sorted(rel["parcial"]):
+            failures.append(
+                f"{rid}: codigo diz direta={sorted(rel['direta'])} "
+                f"parcial={sorted(rel['parcial'])}, doc diz direta={doc_direta} "
+                f"parcial={doc_parcial}")
+
+    for rotulo, constante in (("So a organizacao", report_data.LGPD_CHECK_SO_ORGANIZACAO),
+                              ("Fora da skill", report_data.LGPD_CHECK_FORA_DA_SKILL)):
+        checks += 1
+        achado = re.search(rf"(?m)^{rotulo}:\s*(.+)$", report_data.deaccent(texto))
+        if not achado:
+            failures.append(f"lgpd-check.md sem a linha '{rotulo}: ...'")
+        elif codigos(achado.group(1)) != sorted(constante):
+            failures.append(
+                f"{rotulo}: codigo {sorted(constante)}, doc {codigos(achado.group(1))}")
+
+    # Cada um dos 61 itens cai em exatamente um grupo: decidido por um requisito,
+    # so tocado, so a organizacao prova, ou ainda fora da skill.
+    checks += 1
+    por_item = report_data.lgpd_check_por_item()
+    grupos = [
+        {c for c, v in por_item.items() if v["direta"]},
+        {c for c, v in por_item.items() if not v["direta"]},
+        set(report_data.LGPD_CHECK_SO_ORGANIZACAO),
+        set(report_data.LGPD_CHECK_FORA_DA_SKILL),
+    ]
+    todos = set(report_data.LGPD_CHECK_CODIGOS)
+    vistos = []
+    for grupo in grupos:
+        vistos.extend(grupo)
+    repetidos = sorted({c for c in vistos if vistos.count(c) > 1})
+    faltando = sorted(todos - set(vistos))
+    estranhos = sorted(set(vistos) - todos)
+    if repetidos or faltando or estranhos:
+        failures.append(
+            f"itens do LGPD-Check mal classificados: repetidos={repetidos} "
+            f"faltando={faltando} desconhecidos={estranhos}")
+
+    checks += 1
+    for nossa, deles in report_data.SEVERIDADE_DEVCOMPLY.items():
+        padrao = rf"(?im)^\|\s*{nossa[:3]}\w*\s*\|\s*{deles[:4]}"
+        if not re.search(padrao, report_data.deaccent(texto)):
+            failures.append(f"severidade {nossa} -> {deles} ausente da tabela do doc")
+
+    # O --fail-on do CI aceita os nomes do DevComply; precisa ser a mesma tabela.
+    checks += 1
+    for nossa, deles in report_data.SEVERIDADE_DEVCOMPLY.items():
+        try:
+            obtido = ci_check.nivel_fail_on(deles)
+        except Exception as exc:  # argparse.ArgumentTypeError
+            obtido = f"erro: {exc}"
+        if obtido != nossa.lower():
+            failures.append(f"ci_check --fail-on {deles}: esperado "
+                            f"{nossa.lower()}, obtido {obtido}")
+    return failures, checks
+
+
 def check_signal_names():
-    """Todo sinal citado na documentacao existe no coletor."""
+    """Todo sinal citado na documentacao existe no coletor, e vice-versa."""
     known = {name for name, _, _ in collect.SIGNAL_RULES}
     failures, checks = [], 0
+    documentado = ""
     for folder in ("requirements", "stacks", "artifacts"):
         directory = os.path.join(ROOT, "references", folder)
         if not os.path.isdir(directory):
@@ -505,14 +723,18 @@ def check_signal_names():
             checks += 1
             with open(os.path.join(directory, name), encoding="utf-8") as handle:
                 texto = handle.read()
+            documentado += texto
             # So onde a linha declara que aquilo e sinal. A primeira versao pegava
             # todo token com sublinhado entre crases e acusava `deleted_at`,
             # `opiniao_politica`, `responsavel_id` -- nomes de coluna e de padrao,
             # nao de sinal. Um teste que grita em quatro lugares certos para pegar
             # um errado e um teste que alguem desliga.
             fantasmas = set()
+            # `signals?:` tambem: os requisitos em ingles dizem "collector signals:", e
+            # a primeira versao desta regex so lia "sinais:" -- metade das linhas de
+            # sinal da base LGPD passava sem conferencia.
             for trecho in re.findall(
-                    r"(?:sinais?:|R\d{2}\s*[—-])([^\n|]*)", texto):
+                    r"(?:sinais?:|signals?:|R\d{2}\s*[—-])([^\n|]*)", texto):
                 for nome in re.findall(r"`([a-z][a-z0-9_]{3,})`", trecho):
                     if "_" in nome and nome not in known:
                         fantasmas.add(nome)
@@ -521,6 +743,28 @@ def check_signal_names():
                 failures.append(
                     f"references/{folder}/{name} cita sinal inexistente: "
                     + ", ".join(fantasmas))
+
+    # O sentido inverso: sinal que nenhuma referencia menciona e sinal que o agente
+    # recebe no candidates.json sem saber a que requisito serve.
+    checks += 1
+    sem_doc = sorted(n for n in known if f"`{n}`" not in documentado)
+    if sem_doc:
+        failures.append("sinal do coletor que nenhuma referencia explica: "
+                        + ", ".join(sem_doc))
+
+    # E todo sinal tem um papel no portao de CI -- risco, controle, novidade ou
+    # inventario --, ou o portao o ignora em silencio. A unica excecao e lida em
+    # conjunto com outro sinal (`_achado_eca`).
+    checks += 1
+    papeis = (set(ci_check.RISCOS) | set(ci_check.CONTROLES)
+              | set(ci_check.NOVIDADE_RELEVANTE) | set(ci_check.INVENTARIO)
+              | {"age_self_declaration"})
+    sem_papel = sorted(known - papeis)
+    fantasmas = sorted(papeis - known)
+    if sem_papel:
+        failures.append("sinal sem papel no ci_check: " + ", ".join(sem_papel))
+    if fantasmas:
+        failures.append("ci_check cita sinal inexistente: " + ", ".join(fantasmas))
     return failures, checks
 
 
@@ -568,6 +812,7 @@ def check_skill_frontmatter():
 
 CONSISTENCY = [
     ("tabela de requisitos: codigo x documentacao", check_requirements_table),
+    ("ponte com o LGPD-Check: codigo x documentacao", check_lgpd_check_bridge),
     ("nomes de sinais citados na documentacao", check_signal_names),
     ("versao coerente entre os arquivos", check_version_agreement),
     ("frontmatter do SKILL.md", check_skill_frontmatter),
@@ -591,6 +836,7 @@ def main():
         ("coletor", FIXTURES, run_fixture),
         ("verificador", VERIFIER, run_verifier_case),
         ("portao de ci", CI, run_ci_case),
+        ("devcomply", DEVCOMPLY, run_devcomply_case),
     ]
 
     total_checks = total_cases = failed = 0

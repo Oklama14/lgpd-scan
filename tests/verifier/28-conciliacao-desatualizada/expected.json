@@ -1,0 +1,11 @@
+{
+  "description": "Mesmo relatorio do caso 25, com a secao completa, mas a conciliacao foi gerada contra um report.json anterior. Cobrar a secao a partir dela seria cobrar o relatorio errado: o verificador pede para rodar a conciliacao de novo.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "data": "report.json",
+  "conciliacao": "conciliacao.json",
+  "expect_kind": "relatorio",
+  "expect_clean": false,
+  "expect": {
+    "declarations": 1
+  }
+}

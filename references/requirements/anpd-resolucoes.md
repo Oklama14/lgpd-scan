@@ -47,8 +47,8 @@ Se encontrar um prazo codificado, confira o número. Três dias **úteis** não 
 que setenta e duas horas, e essa confusão é frequente.
 
 ## R15 — Encarregado indicado e canal do titular
-**Res. CD/ANPD nº 18/2024** · sinais: `dpo_contact`, `placeholder_unfilled` ·
-absência importa
+**Res. CD/ANPD nº 18/2024** · sinais: `dpo_contact`, `placeholder_unfilled`,
+`dsar_flow`, `dsar_deadline` · absência importa
 
 O encarregado tem de estar indicado e o canal de atendimento ao titular, disponível
 e divulgado.
@@ -64,6 +64,13 @@ marcador.
 
 Quando o contato existe, ele é uma declaração — o código não prova que alguém atende
 aquela caixa. Credite o que encontrou e mande o resto para `Não verificável`.
+
+O canal pode também estar construído: `dsar_flow` localiza um fluxo de pedido do
+titular (entidade, rota ou fila de solicitações), e `dsar_deadline` um prazo
+codificado. Um fluxo que registra o pedido e a data é evidência mais forte que um
+e-mail na política. Confira o número do prazo: confirmação de existência e acesso
+saem imediatamente em formato simplificado, ou em até quinze dias por declaração
+clara e completa (art. 19, I e II).
 
 ## R16 — Salvaguarda de transferência internacional
 **Res. CD/ANPD nº 19/2024** · sinais: `transfer_safeguard`, `cloud_region`,

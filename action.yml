@@ -17,7 +17,7 @@ inputs:
     required: false
     default: ""
   fail-on:
-    description: Nivel minimo que reprova — alta, media, baixa ou nenhum
+    description: Nivel minimo que reprova — alta, media, baixa ou nenhum (ou catastrofica, grave, leve, como no DevComply)
     required: false
     default: "alta"
   sarif:

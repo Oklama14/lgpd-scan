@@ -1,0 +1,10 @@
+{
+  "description": "`unverifiable` vira pergunta no DevComply, entao cada entrada precisa de assunto e motivo, codigos que existem e nenhuma evidencia: o que tem linha para citar e achado.",
+  "repo": "fixtures/01-node-inventario/repo",
+  "data": "report.json",
+  "expect_kind": "relatorio",
+  "expect_clean": false,
+  "expect_data": {
+    "invalid": ">=4"
+  }
+}

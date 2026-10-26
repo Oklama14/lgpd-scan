@@ -82,7 +82,7 @@ Confirme que ficou assim:
 └── references/
     ├── requirements/     R01–R21, um arquivo por grupo
     ├── artifacts/        ROPA, RIPD, DPA
-    ├── stacks/           Node e Spring
+    ├── stacks/           Node, Spring e front-end
     ├── annotations.md
     └── report-template.md
 ```
@@ -283,12 +283,38 @@ pendências, não uma nota. Você não vai encontrar "78% em conformidade" em lu
 nenhum desta ferramenta, de propósito: é uma frase que alguém leva para uma reunião, e
 nenhum número derivado de leitura de código sustenta aquela frase diante da ANPD.
 
+## Comparando com o que a equipe declarou no DevComply
+
+Se a equipe preencheu o checklist do DevComply, exporte as declarações de lá e peça ao
+agente: "compara com o que declaramos no DevComply". Ou rode direto, depois de uma
+auditoria:
+
+```bash
+python3 ~/.claude/skills/lgpd-scan/scripts/devcomply.py conciliar . --declaracoes devcomply-declaracoes.json
+```
+
+O que olhar primeiro são as linhas `!!`: itens marcados como implementados que o
+código desmente. Cada uma entra na seção "Declarado × código" do relatório, e o
+verificador recusa o relatório que deixa uma de fora. `--falhar-se-divergir` faz o
+comando sair com erro quando houver divergência, se você quiser usá-lo no CI.
+
+O caminho inverso leva o resultado da auditoria para o DevComply:
+
+```bash
+python3 ~/.claude/skills/lgpd-scan/scripts/devcomply.py export .
+```
+
+Grava `.lgpd-scan/devcomply.json` com a situação de cada item do checklist no código,
+com arquivo e linha e **sem trecho de código** — o trecho pode conter um segredo ou
+dado pessoal de teste, e o DevComply envia texto para uma IA na nuvem.
+
 ## Arquivos que aparecem no seu projeto
 
 A skill cria uma pasta `.lgpd-scan/` com: o `candidates.json`, que é a lista bruta de
 onde o coletor olhou; o `STATUS.md`, que registra os sinais encontrados, os ausentes e
 quais requisitos já foram avaliados; o `report.json` com o relatório em formato de
-máquina; e, se você usar o portão, a `baseline.json`.
+máquina; se você usar o portão, a `baseline.json`; e, se comparar com o DevComply, o
+`conciliacao.json` e o `devcomply.json`.
 
 **A `baseline.json` é a exceção: essa você commita.** É o ponto de comparação do CI, e
 sem ela no repositório o portão não tem com o que comparar. As outras três não fazem

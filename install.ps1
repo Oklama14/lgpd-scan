@@ -39,7 +39,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$Version    = '0.5.0'
+$Version    = '0.6.0'
 $MarkBegin  = '<!-- lgpd-scan:begin -->'
 $MarkEnd    = '<!-- lgpd-scan:end -->'
 

@@ -38,6 +38,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import collect  # noqa: E402
+import devcomply  # noqa: E402
 import report_data  # noqa: E402
 
 # Extensions a citation may plausibly point at. Anything else that looks like
@@ -598,6 +599,8 @@ def verify(report_path, repo, profile):
         "rows": scan_table_rows(report_lines, profile),
         "unsupported": unsupported,
         "promises": promises,
+        # Preenchido pelo main() quando existe conciliacao com o DevComply.
+        "declarations": [],
         "files": len(cited_files),
         "data": None,
     }
@@ -682,6 +685,69 @@ def check_promises(report_lines, repo):
                 f"promete {rotulo} e nenhum sinal sustenta "
                 f"({' ou '.join(sinais)}): \"{frase[:80]}\"")
     return problems
+
+
+# --------------------------------------------------------------------------
+# Declarado (DevComply) x codigo
+# --------------------------------------------------------------------------
+# Quando a equipe trouxe as declaracoes do DevComply, `devcomply.py conciliar`
+# grava a conciliacao. Um item marcado como implementado que o codigo desmente e o
+# achado que justifica ter as duas ferramentas; um relatorio que o deixa de fora
+# esconde exatamente o que o leitor mais precisava ver.
+
+DECLARED_SECTION = re.compile(
+    r"^#{2,3}\s*declarad[oa]s?\s*(?:\u00d7|x|vs\.?|versus|e)\s*c[oó]digo", re.I)
+
+
+def check_declarations(report_lines, conciliacao_path, report_generated_at=None):
+    """Toda divergencia da conciliacao aparece na secao "Declarado x codigo".
+
+    `report_generated_at` e o do report.json ao lado. A conciliacao copia esse valor
+    quando e gerada; se ele mudou, ela confrontou as declaracoes com uma auditoria
+    anterior, e cobrar a secao a partir dela seria cobrar o relatorio errado.
+    """
+    try:
+        with open(conciliacao_path, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+    except (OSError, ValueError) as exc:
+        return [f"nao consegui ler {conciliacao_path}: {exc}"]
+
+    feita_contra = (data.get("origem") or {}).get("generated_at")
+    if report_generated_at and feita_contra and feita_contra != report_generated_at:
+        return [f"a conciliacao foi feita contra outro report.json (generated_at "
+                f"{feita_contra}; o atual e {report_generated_at}) -- rode "
+                f"`devcomply.py conciliar` de novo"]
+
+    divergentes = [i for i in data.get("itens") or []
+                   if isinstance(i, dict) and i.get("resultado") in devcomply.DIVERGENTES]
+    if not divergentes:
+        return []
+
+    secao, dentro = [], False
+    for line in report_lines:
+        texto = deaccent(line.strip())
+        if DECLARED_SECTION.match(texto):
+            dentro = True
+            continue
+        if dentro and re.match(r"^#{1,2} ", line):
+            break
+        if dentro:
+            secao.append(line)
+
+    if not dentro:
+        return [f"a conciliacao com o DevComply tem {len(divergentes)} divergencia(s) "
+                f"({', '.join(i['codigo'] for i in divergentes)}) e o relatorio nao "
+                f"tem a secao \"Declarado \u00d7 codigo\""]
+
+    corpo = "\n".join(secao)
+    problemas = []
+    for item in divergentes:
+        if not re.search(rf"(?<![A-Z0-9-]){re.escape(item['codigo'])}(?![0-9])", corpo):
+            problemas.append(
+                f"{item['codigo']}: marcado como implementado no DevComply, e o codigo "
+                f"mostra {item.get('situacao_no_codigo')} "
+                f"({', '.join(item.get('requisitos') or [])}) -- nao aparece na secao")
+    return problemas
 
 
 def check_evidence_item(item, repo, cache):
@@ -806,7 +872,7 @@ def verify_data(data_path, repo, report_lines):
 # first is often a legitimate paraphrase, the second is a gap in what could be
 # checked rather than a proven defect -- --strict promotes both.
 BLOCKING = ("errors", "uncited", "missing_sections", "leaks", "placeholders",
-            "rows", "unsupported", "promises")
+            "rows", "unsupported", "promises", "declarations")
 
 # O report.json tem as proprias categorias bloqueantes. Separadas de BLOCKING porque
 # ele e opcional: um relatorio sem registro de maquina ainda e um relatorio valido.
@@ -866,6 +932,14 @@ def report(result, quiet=False):
         out("  A politica so promete o que o codigo entrega. Ou implemente, ou\n"
             "  reescreva como pedido ao encarregado — que e legitimo, verdadeiro, e\n"
             "  e o que o sistema faz hoje.\n")
+
+    if result.get("declarations"):
+        out(f"\nDECLARACAO SEM IMPLEMENTACAO ({len(result['declarations'])}):\n")
+        for item in result["declarations"]:
+            out(f"  {item}\n")
+        out("  O DevComply diz que esta implementado e o codigo nao mostra. Cada\n"
+            "  divergencia da conciliacao entra na secao \"Declarado \u00d7 codigo\",\n"
+            "  com o requisito e a evidencia -- e o achado mais util da comparacao.\n")
 
     if result["rows"]:
         out(f"\nLINHAS DE TABELA SEM EVIDENCIA ({len(result['rows'])}):\n")
@@ -944,6 +1018,9 @@ def main():
                              "<repo>/.lgpd-scan/report.json, quando existir)")
     parser.add_argument("--no-data", action="store_true",
                         help="nao procurar o report.json")
+    parser.add_argument("--conciliacao", default=None,
+                        help="conciliacao com o DevComply a conferir (padrao: "
+                             "<repo>/.lgpd-scan/conciliacao.json, quando existir)")
     parser.add_argument("--quiet", action="store_true",
                         help="show only problems")
     parser.add_argument("--strict", action="store_true",
@@ -972,6 +1049,22 @@ def main():
             sys.stderr.write(f"erro: nao encontrei {data_path}\n")
             return 2
         result["data"] = verify_data(data_path, repo, lines)
+
+    conciliacao = args.conciliacao
+    if not conciliacao and kind == "relatorio":
+        guess = os.path.join(repo, ".lgpd-scan", "conciliacao.json")
+        conciliacao = guess if os.path.isfile(guess) else None
+    if conciliacao:
+        if not os.path.isfile(conciliacao):
+            sys.stderr.write(f"erro: nao encontrei {conciliacao}\n")
+            return 2
+        gerado = None
+        if data_path:
+            try:
+                gerado = report_data.load(data_path).get("generated_at")
+            except (OSError, ValueError):
+                gerado = None
+        result["declarations"] = check_declarations(lines, conciliacao, gerado)
 
     clean = report(result, quiet=args.quiet)
     if not clean:

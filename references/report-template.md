@@ -39,6 +39,23 @@ prosa, para quem vai ler só isso.}
 | R02 | Dados sensíveis | 11 | Não atendido | Alta |
 | ... | | | | |
 
+## Comece por aqui
+
+{Três ações, na ordem em que devem ser feitas. Ordene por severidade — Alta antes de
+Média, Média antes de Baixa; no empate, a de confiança maior primeiro e depois a mais
+barata de corrigir. É a mesma ordem do plano de ação do DevComply, para que as duas
+listas possam ser lidas lado a lado. Uma linha por ação: requisito, severidade,
+arquivo e o que fazer. Com menos de três lacunas, liste as que existem; sem nenhuma,
+diga isso aqui.}
+
+1. **R09 · Alta** — Rotacionar a senha do banco que está em `docker-compose.yml:14`
+   e só depois movê-la para variável de ambiente: apagar a linha não a tira do
+   histórico do git.
+2. **R03 · Alta** — Criar `DELETE /users/me` em
+   `src/users/users.controller.ts`, derivando o id do token.
+3. **R11 · Média** — Registrar as operações de tratamento: hoje nenhum serviço grava
+   quem acessou ou alterou dado pessoal.
+
 ## Dados pessoais encontrados
 
 | Tabela / entidade | Campo | Natureza | Onde |
@@ -75,10 +92,31 @@ obrigação legal, documentar a base e definir o prazo do apagamento definitivo.
 
 **Confiança:** Alta.
 
+## Declarado × código
+
+{Só quando houver declarações do DevComply — o resultado de
+`scripts/devcomply.py conciliar`. Uma linha por divergência: item que a equipe marcou
+como implementado e cujo requisito o código mostra como `Parcial` ou `Não atendido`.
+O verificador recusa o relatório que deixa uma de fora. Depois da tabela, uma frase
+sobre o que se confirmou e o que está implementado sem ter sido declarado. Sem
+declarações, omita a seção.}
+
+| Item LGPD-Check | Declarado | O código mostra | Requisito | Onde |
+|---|---|---|---|---|
+| C-03 | Implementado | Não atendido · Alta | R06 | nenhuma coluna de aceite em `src/users/user.entity.ts:12` — `export class User` |
+| D-03 | Implementado | Parcial · Média | R04 | `src/users/users.service.ts:88` — `exportar(` — a exportação deixa o consentimento de fora |
+
 ## Não verificável a partir do código
 
-{Lista do que você suspeitou mas não conseguiu confirmar, e por quê. Esta seção
-é o que separa um relatório honesto de um relatório inflado — use.}
+{O que você suspeitou mas não conseguiu confirmar, e por quê. Esta seção é o que
+separa um relatório honesto de um relatório inflado — use. Uma linha por assunto, com
+a pergunta que resolveria; o mesmo conteúdo vai em `unverifiable` no report.json, e é
+de lá que o DevComply tira as perguntas para a equipe.}
+
+| Assunto | Por que o código não responde | Pergunta para a equipe | LGPD-Check |
+|---|---|---|---|
+| Contrato com operadores | O código envia dados à API do Gemini (`src/ai/ai.service.ts:41`); se há contrato com o Google não aparece no repositório | Existe contrato ou termo de tratamento com o Google para a API? | D-09, C-02 |
+| Treinamento da equipe | Não deixa rastro em código | A equipe recebeu capacitação em LGPD? | R-07 |
 
 ## Limitações desta análise
 
@@ -153,11 +191,17 @@ discordam, não dá para saber qual está certo.
   "third_parties": [
     {"name": "Google (Gemini API)", "data": "conteúdo submetido pelo titular",
      "country": "EUA", "file": "src/ai/ai.service.ts", "line": 41}
+  ],
+  "unverifiable": [
+    {"topic": "Contrato com operadores", "requirement": "R12",
+     "reason": "O código envia dados à API do Gemini; contrato com o Google não aparece no repositório.",
+     "question": "Existe contrato ou termo de tratamento com o Google para a API?",
+     "lgpd_check": ["D-09", "C-02"]}
   ]
 }
 ```
 
-Cinco regras que o validador aplica, e o motivo de cada uma:
+Seis regras que o validador aplica, e o motivo de cada uma:
 
 **Os 21 requisitos aparecem, sempre.** Omitir um é diferente de respondê-lo com
 `Nao se aplica`: o primeiro deixa o leitor sem saber se a pergunta foi feita. Grupo
@@ -181,6 +225,13 @@ e o relatório vira o vazamento. Escreva a linha com o valor substituído:
 `DB_PASS=***`. O identificador sobrevive, que é o que torna a citação conferível, e
 o valor não sai do código. Vale para qualquer achado cujo trecho literal seja a
 credencial.
+
+**`unverifiable` não cita linha.** É opcional; quando vem, cada entrada traz `topic`
+e `reason`, e pode trazer `requirement`, `question` e os códigos do LGPD-Check em
+`lgpd_check` (sem eles, valem os do requisito). Nada de `evidence` nem `snippet`: o
+que tem linha para citar é achado, não "não verificável" — e esta lista sai da skill
+para o DevComply, onde trecho de código não deve ir. Escreva `reason` sem colar
+código pelo mesmo motivo.
 
 **Status sem acento no JSON** (`Nao atendido`, `Nao verificavel`, `Nao se aplica`) e
 com acento no markdown. O validador aceita as duas formas; escreva a primeira no JSON
