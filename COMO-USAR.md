@@ -285,9 +285,10 @@ nenhum número derivado de leitura de código sustenta aquela frase diante da AN
 
 ## Comparando com o que a equipe declarou no DevComply
 
-Se a equipe preencheu o checklist do DevComply, exporte as declarações de lá e peça ao
-agente: "compara com o que declaramos no DevComply". Ou rode direto, depois de uma
-auditoria:
+Se a equipe preencheu o checklist do [DevComply](https://dev-comply.vercel.app), exporte
+as declarações de lá: no checklist do projeto, o botão **Comparar com o código** baixa o
+`devcomply-declaracoes.json`. Salve o arquivo na raiz do repositório e peça ao agente:
+"compara com o que declaramos no DevComply". Ou rode direto, depois de uma auditoria:
 
 ```bash
 python3 ~/.claude/skills/lgpd-scan/scripts/devcomply.py conciliar . --declaracoes devcomply-declaracoes.json
@@ -298,7 +299,8 @@ código desmente. Cada uma entra na seção "Declarado × código" do relatório
 verificador recusa o relatório que deixa uma de fora. `--falhar-se-divergir` faz o
 comando sair com erro quando houver divergência, se você quiser usá-lo no CI.
 
-O caminho inverso leva o resultado da auditoria para o DevComply:
+O caminho inverso prepara o resultado da auditoria para o DevComply (a importação, do
+lado do DevComply, ainda não existe):
 
 ```bash
 python3 ~/.claude/skills/lgpd-scan/scripts/devcomply.py export .

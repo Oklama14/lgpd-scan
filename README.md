@@ -20,6 +20,11 @@ MD5. Esta skill não pergunta nada ao desenvolvedor: ela lê o que o sistema faz
 Roda inteiramente na máquina de quem usa. Sem backend, sem chave de API, sem enviar
 código para lugar nenhum.
 
+Faz par com o [DevComply](https://dev-comply.vercel.app), um checklist web de LGPD
+onde a equipe registra o que diz ter implementado: a skill confronta essas
+declarações com o código e aponta onde as duas coisas não batem (veja
+[Integração com o DevComply](#integração-com-o-devcomply)).
+
 ## Instalação
 
 ```bash
@@ -295,15 +300,22 @@ mesma tarde.
 
 ## Integração com o DevComply
 
-O DevComply e esta skill olham para o mesmo problema de
-lados opostos, e é por isso que se completam. O DevComply é um checklist web sobre o
-LGPD-Check: a equipe **declara** o que está implementado, e o que não deixa rastro em
-código — encarregado, contratos, treinamento, plano de incidentes — só pode ser
-declarado. A skill lê o que o **código faz**, e nisso uma declaração não a convence.
+O [DevComply](https://dev-comply.vercel.app) ([código](https://github.com/Oklama14/DevComply))
+e esta skill olham para o mesmo problema de lados opostos, e é por isso que se
+completam. O DevComply é um checklist web sobre o LGPD-Check, o checklist de inspeção
+de [Mendes, Viana e Rivero (SBES 2021)](https://sol.sbc.org.br/index.php/sbes/article/view/18822)
+avaliado por [Neitzke et al. (SBQS 2023)](https://sol.sbc.org.br/index.php/sbqs/article/view/27108):
+a equipe **declara** o que está implementado, e o que não deixa rastro em código —
+encarregado, contratos, treinamento, plano de incidentes — só pode ser declarado. A
+skill lê o que o **código faz**, e nisso uma declaração não a convence.
 
 `references/requirements/lgpd-check.md` liga os dois: para cada um dos 61 itens do
 LGPD-Check, qual requisito da skill o decide, qual só o toca, e quais só a organização
 prova.
+
+As declarações saem do próprio DevComply: no checklist do projeto, o botão
+**Comparar com o código** baixa o `devcomply-declaracoes.json` e mostra o pedido para
+fazer ao agente.
 
 ```bash
 python3 scripts/devcomply.py conciliar . --declaracoes devcomply-declaracoes.json
@@ -330,7 +342,8 @@ ter as duas ferramentas é a divergência — item marcado como implementado que
 desmente —, e o verificador recusa o relatório que deixa uma de fora da seção
 "Declarado × código".
 
-**`export`** grava `.lgpd-scan/devcomply.json` para o DevComply importar: a situação
+**`export`** grava `.lgpd-scan/devcomply.json` no formato que o DevComply vai importar
+(o lado da importação, no DevComply, ainda não existe): a situação
 de cada item no código, a severidade nas duas escalas (`Alta`↔`Catastrófica`,
 `Média`↔`Grave`, `Baixa`↔`Leve`), arquivo e linha — **sem trecho de código**, porque o
 trecho pode carregar dado pessoal de um seed ou um segredo, e o DevComply manda texto

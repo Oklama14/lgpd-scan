@@ -233,8 +233,10 @@ the DevComply's names for the same scale: `catastrofica`, `grave`, `leve`.
 
 ## 9. DevComply, when asked
 
-The DevComply is a checklist web app built on the LGPD-Check: the team *declares*
-what is implemented, item by item. This skill reads what the code does. The two meet
+The DevComply (https://dev-comply.vercel.app) is a checklist web app built on the
+LGPD-Check: the team *declares* what is implemented, item by item. Its checklist page
+has a **Comparar com o código** button that downloads `devcomply-declaracoes.json` —
+point the user there when they have no export yet. This skill reads what the code does. The two meet
 through `references/requirements/lgpd-check.md` — which item of the checklist each
 requirement decides, which it only touches, which only the organisation can prove.
 Read it before either command.
@@ -251,7 +253,8 @@ whose requirement the code shows as a gap. Each one goes in the report's **Decla
 código** section, and the verifier picks the file up on its own and refuses a report
 that leaves one out. It is the most useful single finding the comparison produces.
 
-`export` writes `.lgpd-scan/devcomply.json` for the DevComply to import: the status of
+`export` writes `.lgpd-scan/devcomply.json` in the format the DevComply will import (the
+import side is not built yet — say so if the user asks where to load it): the status of
 each checklist item in the code, with file and line but **no snippet** — a snippet can
 carry a seed's personal data or a secret, and the DevComply sends text to a cloud
 model. The `unverifiable` list goes along, as questions for the team.
